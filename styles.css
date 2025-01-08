@@ -2,3 +2,13 @@ body{
     height: 100%;
     width: 100%;
 }
+.gradient-background{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: centre;
+    text-align: centre;
+
+    background: linear-gradient(#1F2025,#2A343D,#6A8295,#2A343D,#1F2025)
+    color white;
+}
