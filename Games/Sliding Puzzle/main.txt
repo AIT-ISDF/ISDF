@@ -1,0 +1,1 @@
+This is a sliding puzzle game with numbers from 1-15.
