@@ -48,6 +48,12 @@ h1 {
     color: #fff;
 }
 
+.sub-instruction {
+    padding-left: 20px;
+    font-size: 0.7em !important;
+    color: #aaa !important;
+}
+
 button {
     font-family: 'Press Start 2P', cursive;
     padding: 15px 30px;
@@ -117,6 +123,16 @@ button:hover {
     font-weight: bold;
 }
 
+.correct-flag {
+    background-color: #00ff00 !important;
+    transition: background-color 0.5s;
+}
+
+.wrong-flag {
+    background-color: #ff6b6b !important;
+    transition: background-color 0.5s;
+}
+
 /* Number colors */
 .n1 { color: #3498db; }
 .n2 { color: #2ecc71; }
@@ -140,7 +156,37 @@ button:hover {
     margin-bottom: 20px;
 }
 
+.win-message {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px #00ff00;
+    animation: winPulse 1.5s infinite;
+}
+
+@keyframes winPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
 #final-time {
     margin: 20px 0;
     color: #fff;
+}
+
+#result-message {
+    margin: 15px 0;
+    font-size: 0.8em;
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: repeat(10, 30px);
+    }
+    
+    .cell {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8em;
+    }
 }
