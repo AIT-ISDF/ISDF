@@ -1,14 +1,110 @@
-body{
-    height: 100%;
-    width: 100%;
-}
-.gradient-background{
+body {
+    margin: 0;
+    padding: 0;
     height: 100vh;
+    width: 100vw;
+    overflow: hidden;
     display: flex;
     justify-content: center;
-    align-items: centre;
-    text-align: centre;
+    align-items: center;
+    background: url('/assets/CRACKHUNT.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
 
-    background: linear-gradient(#1F2025,#2A343D,#6A8295,#2A343D,#1F2025)
-    color white;
+.bot {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: -10rem;
+}
+
+.box {
+    position: absolute;
+    width: 25rem; /* Adjust size as needed */
+    height: 100px;
+    margin: 100px;
+}
+
+.box img {
+    width: 100%;
+    height: auto;
+}
+
+.top-left {
+    top: 1rem;
+    left: 1rem;
+    transform: rotateY(180deg);
+    margin-top: 3rem;
+}
+
+.top-right {
+    top: 1rem;
+    right: 1rem;
+    transform: rotate(0deg);
+    margin-top: 3rem;
+}
+
+.bottom-left {
+    bottom: 1rem;
+    left: 1rem;
+    transform: rotate(180deg);
+    margin-bottom: 3rem;
+}
+
+.bottom-right {
+    bottom: 1rem;
+    right: 1rem;
+    transform: rotateX(180deg);
+    margin-bottom: 3rem;
+}
+.top-left h1{
+    position: absolute;
+    top: 2rem; /* Adjust to place above the box */
+    /* left: 0; */
+    right: 5rem;
+    color: aliceblue;
+    z-index: 10; /* Ensures it appears above the box */
+    transform: rotateY(-180deg); /* Counter-rotate to display text correctly */
+    font-size: 3.5rem; /* Adjust size as needed */
+    margin: 0;
+}
+.top-right h1{
+    position: absolute;
+    top: 2rem; /* Adjust to place above the box */
+    /* left: 0; */
+    right: 5rem;
+    color: aliceblue;
+    z-index: 10; /* Ensures it appears above the box */
+    transform: rotateY(180deg);
+    transform: rotate(0deg); /* Counter-rotate to display text correctly */
+    font-size: 3.5rem; /* Adjust size as needed */
+    margin: 0;
+}
+.bottom-left h1{
+    position: absolute;
+    top: 2rem; /* Adjust to place above the box */
+    /* left: 0; */
+    right: 5rem;
+    color: aliceblue;
+    z-index: 10; /* Ensures it appears above the box */
+    transform: rotateY(180deg);
+    transform: rotate(180deg); /* Counter-rotate to display text correctly */
+    font-size: 3.5rem; /* Adjust size as needed */
+    margin: 0;
+}
+.bottom-right h1{
+    position: absolute;
+    top: 2rem; /* Adjust to place above the box */
+    /* left: 0; */
+    right: 5rem;
+    color: aliceblue;
+    z-index: 10; /* Ensures it appears above the box */
+    /* transform: rotateY(180deg); */
+    transform: rotateX(180deg); /* Counter-rotate to display text correctly */
+    font-size: 3.5rem; /* Adjust size as needed */
+    margin: 0;
 }
