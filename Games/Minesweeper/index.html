@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>MINESWEEPER</h1>
+            <div class="instructions">
+                <p>🖱️ Left Click: Reveal tile</p>
+                <p>🖱️ Right Click: Place/Remove flag (O)</p>
+                <p>💣 Mines: 20</p>
+            </div>
+            <button id="play-button">PLAY GAME</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <div class="game-info">
+                    <span id="flags-left">Flags: 20</span>
+                    <span id="time">Time: 0s</span>
+                </div>
+                <button id="restart">Restart Game</button>
+            </div>
+            <div id="grid" class="grid"></div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h2 id="game-over-text">Game Over!</h2>
+            <p id="final-time"></p>
+            <button id="restart-over">Play Again</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
