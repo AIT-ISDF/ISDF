@@ -1,1 +1,0 @@
-This is the traditional mastermind game where the player has to guess the secret code using the color pegs in total 10 attempts
