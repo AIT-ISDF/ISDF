@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mastermind</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>MASTERMIND</h1>
+            <div class="instructions">
+                <p>Break the secret color code in 10 tries!</p>
+                <div class="color-guide">
+                    <div class="color-sample" style="background: #FF6B6B"></div>
+                    <div class="color-sample" style="background: #4ECDC4"></div>
+                    <div class="color-sample" style="background: #FFD93D"></div>
+                    <div class="color-sample" style="background: #95A5A6"></div>
+                    <div class="color-sample" style="background: #6C5CE7"></div>
+                    <div class="color-sample" style="background: #A8E6CF"></div>
+                </div>
+                <p>🎯 Select colors and click 'Check' to submit your guess</p>
+                <p>⚫ Black peg = Correct color & position</p>
+                <p>⚪ White peg = Correct color, wrong position</p>
+            </div>
+            <div class="start-buttons">
+                <button id="start-game" class="start-button">START GAME</button>
+                <button id="rules-button" class="rules-button">HOW TO PLAY</button>
+            </div>
+        </div>
+
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <h2>MASTERMIND</h2>
+                <div class="game-controls">
+                    <button id="in-game-rules" class="rules-button">Rules</button>
+                    <div class="game-info">
+                        <span id="attempts">Attempts: 10</span>
+                        <button id="restart">New Game</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-board">
+                <div id="attempts-container"></div>
+                
+                <div class="color-picker">
+                    <div class="colors">
+                        <div class="color-option" style="background: #FF6B6B" data-color="0"></div>
+                        <div class="color-option" style="background: #4ECDC4" data-color="1"></div>
+                        <div class="color-option" style="background: #FFD93D" data-color="2"></div>
+                        <div class="color-option" style="background: #95A5A6" data-color="3"></div>
+                        <div class="color-option" style="background: #6C5CE7" data-color="4"></div>
+                        <div class="color-option" style="background: #A8E6CF" data-color="5"></div>
+                    </div>
+                    <div class="current-guess">
+                        <div class="guess-peg empty"></div>
+                        <div class="guess-peg empty"></div>
+                        <div class="guess-peg empty"></div>
+                        <div class="guess-peg empty"></div>
+                    </div>
+                    <button id="check-button" disabled>Check</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Modal -->
+        <div id="rules-modal" class="modal hidden">
+            <div class="modal-content">
+                <button class="close-button" id="close-rules">×</button>
+                <h2>How to Play</h2>
+                <div class="rules-content">
+                    <p>🎯 Break the secret color code in 10 attempts!</p>
+                    <div class="rules-section">
+                        <h3>Colors Available:</h3>
+                        <div class="color-guide">
+                            <div class="color-sample" style="background: #FF6B6B"></div>
+                            <div class="color-sample" style="background: #4ECDC4"></div>
+                            <div class="color-sample" style="background: #FFD93D"></div>
+                            <div class="color-sample" style="background: #95A5A6"></div>
+                            <div class="color-sample" style="background: #6C5CE7"></div>
+                            <div class="color-sample" style="background: #A8E6CF"></div>
+                        </div>
+                    </div>
+                    <div class="rules-section">
+                        <h3>How to Play:</h3>
+                        <ul>
+                            <li>Select colors to create your guess</li>
+                            <li>Click 'Check' to submit your guess</li>
+                            <li>Use the feedback pegs to deduce the code</li>
+                        </ul>
+                    </div>
+                    <div class="rules-section">
+                        <h3>Feedback Pegs:</h3>
+                        <div class="feedback-guide">
+                            <div class="feedback-item">
+                                <div class="feedback-peg" style="background: #000"></div>
+                                <span>Correct color & position</span>
+                            </div>
+                            <div class="feedback-item">
+                                <div class="feedback-peg" style="background: #fff"></div>
+                                <span>Correct color, wrong position</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div class="level-win-message" id="levelWinMessage">
+            <h2>Congratulations! 🎉</h2>
+            <p>You've completed Level 7!</p>
+            <div class="win-buttons">
+                <button onclick="returnToLevels()">Return to Levels</button>
+                <button onclick="goToNextLevel()">Next Level</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h2 id="game-over-text">Game Over!</h2>
+            <div id="secret-code"></div>
+            <p id="attempts-used"></p>
+            <button id="restart-over">Play Again</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

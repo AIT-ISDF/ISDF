@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Sudoku - Level 5</title>
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+
+    <div class="container">
+        <h1>Sudoku Game</h1>
+        <div class="sudoku-board" id="sudoku-board"></div>
+        <button id="check-answer">Check Answer</button>
+        <p id="feedback"></p>
+    </div>
+
+    <div class="win-message" id="winMessage">
+        <h2>Congratulations! 🎉</h2>
+        <p>You've completed Level 5!</p>
+        <div class="win-buttons">
+            <button onclick="returnToLevels()">Return to Levels</button>
+            <button onclick="goToNextLevel()">Next Level</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
