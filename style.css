@@ -14,7 +14,7 @@ body {
     width: 100vw;
     overflow-x: hidden;
     position: relative;
-    background: url('../images/CRACKHUNT.jpg') no-repeat center center fixed;
+    background: url('./images/CRACKHUNT.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
