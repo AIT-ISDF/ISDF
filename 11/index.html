@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lights Out Game</title>
+    <title>Lights Out Game - Level 11</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
     <div class="container">
         <div class="welcome-screen" id="welcomeScreen">
             <h1>Lights Out</h1>
@@ -25,6 +29,14 @@
         <div class="game-controls" id="gameControls" style="display: none;">
             <button class="rules-button" onclick="showRules()" id="rulesBtn">Show Rules</button>
             <button class="reset-button" onclick="resetGame()" id="resetBtn">Reset Game</button>
+        </div>
+        <div class="level-complete" id="levelComplete">
+            <h2>Congratulations! 🎉</h2>
+            <p>You've completed Level 11!</p>
+            <div class="level-buttons">
+                <button onclick="returnToLevels()">Return to Levels</button>
+                <button onclick="goToNextLevel()">Next Level</button>
+            </div>
         </div>
 
         <div class="congrats-screen" id="congratsScreen">

@@ -1,3 +1,28 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Check level access
+    const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
+    if (11 > currentProgress) {
+        window.location.href = '../index.html';
+        return;
+    }
+});
+
+// Add navigation functions
+function returnToLevels() {
+    window.location.href = '../index.html';
+}
+
+function goToNextLevel() {
+    window.location.href = '../12/index.html';
+}
+
+function completeLevel(levelNumber) {
+    const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
+    if (levelNumber === currentProgress) {
+        localStorage.setItem('levelProgress', (currentProgress + 1).toString());
+    }
+}
+
 const BOARD_SIZE = 5;
 let moves = 0;
 let gameBoard = [];
@@ -72,8 +97,10 @@ function checkWin() {
         document.getElementById('finalMoves').textContent = moves;
         document.getElementById('gameBoard').style.display = 'none';
         document.getElementById('movesCounter').style.display = 'none';
-        document.getElementById('rulesBtn').style.display = 'none';
-        document.getElementById('congratsScreen').style.display = 'block';
+        document.getElementById('gameControls').style.display = 'none';
+        document.getElementById('levelComplete').style.display = 'block';
+        document.querySelector('.next-level-button').style.display = 'block';
+        completeLevel(11);
     }
 }
 
@@ -86,9 +113,11 @@ function startGame() {
 
 function restartGame() {
     document.getElementById('congratsScreen').style.display = 'none';
+    document.getElementById('levelComplete').style.display = 'none';
     document.getElementById('gameBoard').style.display = 'grid';
     document.getElementById('movesCounter').style.display = 'block';
-    document.getElementById('rulesBtn').style.display = 'inline-block';
+    document.getElementById('gameControls').style.display = 'flex';
+    document.querySelector('.next-level-button').style.display = 'none';
     createBoard();
 }
 
