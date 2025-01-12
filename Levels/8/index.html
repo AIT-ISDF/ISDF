@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tower of Hanoi - Level 8</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>TOWER OF HANOI</h1>
+            <div class="instructions">
+                <p>Move all disks from the first rod to the last rod</p>
+                <p>Rules:</p>
+                <ul>
+                    <li>Only one disk can be moved at a time</li>
+                    <li>A larger disk cannot be placed on top of a smaller disk</li>
+                    <li>Only the top disk of a stack can be moved</li>
+                </ul>
+                <div class="game-info">
+                    <p>Number of disks: 5</p>
+                    <p>Minimum moves required: 31</p>
+                </div>
+            </div>
+            <button id="start-game" class="start-button">START GAME</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <h2>TOWER OF HANOI</h2>
+                <div class="game-info">
+                    <span id="moves">Moves: 0</span>
+                    <span id="timer">Time: 00:00</span>
+                </div>
+                <button id="restart" class="restart-button">Restart</button>
+            </div>
+
+            <div class="game-board">
+                <div class="towers">
+                    <div class="tower" id="tower1">
+                        <div class="rod"></div>
+                        <div class="base"></div>
+                    </div>
+                    <div class="tower" id="tower2">
+                        <div class="rod"></div>
+                        <div class="base"></div>
+                    </div>
+                    <div class="tower" id="tower3">
+                        <div class="rod"></div>
+                        <div class="base"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="level-complete" class="screen hidden">
+            <h2>Congratulations! 🎉</h2>
+            <p>You've completed Level 8!</p>
+            <div class="level-buttons">
+                <button onclick="returnToLevels()">Return to Levels</button>
+                <button onclick="goToNextLevel()">Next Level</button>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="win-screen" class="screen hidden">
+            <h2>Congratulations!</h2>
+            <div class="win-stats">
+                <p id="final-moves">Moves: 0</p>
+                <p id="final-time">Time: 00:00</p>
+                <p id="minimum-moves">Minimum possible moves: 31</p>
+            </div>
+            <div class="win-buttons">
+                <button id="play-again">Play Again</button>
+                <button id="new-game">New Game</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
