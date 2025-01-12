@@ -1,0 +1,172 @@
+/* style.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+}
+
+.sudoku-board {
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    grid-template-rows: repeat(9, 40px);
+    gap: 0;
+    background-color: #333;
+    margin: 20px auto;
+    border: 2px solid #333;
+}
+
+.sudoku-board input {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    border: 1px solid #bbb;
+    font-size: 18px;
+    font-weight: bold;
+    outline: none;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.sudoku-board input[disabled] {
+    background-color: #ddd;
+    color: #555;
+}
+
+/* Thicker borders for 3x3 subgrids */
+.sudoku-board input:nth-child(9n+1) {
+    border-left: 2px solid #333;
+}
+
+.sudoku-board input:nth-child(9n) {
+    border-right: 2px solid #333;
+}
+
+.sudoku-board input:nth-child(-n+9),
+.sudoku-board input:nth-child(n+73) {
+    border-top: 2px solid #333;
+}
+
+.sudoku-board input:nth-child(n+19):nth-child(-n+27),
+.sudoku-board input:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid #333;
+}
+/* Add these new styles to your existing CSS */
+.game-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.return-button, .next-level-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.return-button {
+    background-color: #2196F3;
+    color: white;
+}
+
+.return-button:hover {
+    background-color: #1976D2;
+    transform: scale(1.05);
+}
+
+.next-level-button {
+    background-color: #4CAF50;
+    color: white;
+    display: none;
+}
+
+.next-level-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.win-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 30px 50px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+    z-index: 2000;
+}
+
+.win-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.win-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.win-buttons button:first-child {
+    background-color: #2196F3;
+    color: white;
+}
+
+.win-buttons button:last-child {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.win-buttons button:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -60%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* Modify your existing button styles */
+#check-answer {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#check-answer:hover {
+    background-color: #45a049;
+}
+
+#feedback {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}

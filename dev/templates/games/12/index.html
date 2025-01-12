@@ -1,0 +1,147 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Circuit Logic - Level 12</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/12/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">
+            <i class="fas fa-home"></i> Return
+        </button>
+        <button class="next-level-button" onclick="goToNextLevel()">
+            <i class="fas fa-forward"></i> Next Level
+        </button>
+    </div>
+
+    <div id="game-container">
+        <div class="power-indicator">
+            <div class="power-light"></div>
+            <span>System Power</span>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>Advanced Circuit Logic</h1>
+            <div class="objective-container">
+                <h3>Mission Objectives:</h3>
+                <ul>
+                    <li>Create a stable power distribution network</li>
+                    <li>Balance load across all circuits</li>
+                    <li>Maintain voltage levels within safety limits</li>
+                    <li>Complete circuit under time pressure</li>
+                </ul>
+            </div>
+            <button id="start-button">Initialize System</button>
+        </div>
+
+        <!-- Game Board -->
+        <div id="game-board" class="hidden">
+            <div class="component-tray">
+                <!-- Component slots will be generated here -->
+            </div>
+            
+            <div class="circuit-grid">
+                <!-- Circuit grid will be generated here -->
+            </div>
+
+            <div class="status-panel">
+                <div class="voltage-meter">
+                    <div class="meter-label">System Voltage</div>
+                    <div class="meter-value">0.0V</div>
+                    <div class="meter-bar">
+                        <div class="meter-fill"></div>
+                    </div>
+                </div>
+                <div class="time-display">
+                    <div class="time-label">Time Remaining</div>
+                    <div class="time-value">03:00</div>
+                </div>
+                <div class="error-counter">
+                    <div class="error-label">System Errors</div>
+                    <div class="error-value">0/3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden">
+            <div class="result-container">
+                <h2>System Failure</h2>
+                <div class="stats">
+                    <p>Time Elapsed: <span id="time-elapsed">00:00</span></p>
+                    <p>Errors Encountered: <span id="error-count">0</span></p>
+                    <p>Circuit Completion: <span id="completion-percentage">0%</span></p>
+                </div>
+                <button id="restart-button">Reinitialize System</button>
+            </div>
+        </div>
+
+        <!-- Win Message -->
+        <div class="win-message" id="winMessage">
+            <div class="success-animation">
+                <div class="checkmark-circle">
+                    <div class="checkmark"></div>
+                </div>
+            </div>
+            <h2>System Successfully Optimized! 🎉</h2>
+            <div class="performance-metrics">
+                <div class="metric">
+                    <span class="label">Efficiency Rating:</span>
+                    <span class="value" id="efficiency-rating">98%</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Completion Time:</span>
+                    <span class="value" id="completion-time">02:34</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Power Stability:</span>
+                    <span class="value" id="power-stability">Optimal</span>
+                </div>
+            </div>
+            <div class="win-buttons">
+                <button onclick="returnToLevels()">Return to Command Center</button>
+                <button onclick="goToNextLevel()">Proceed to Next Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game13' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        const csrfToken = "{{ csrf_token }}";
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+        }
+        
+        function goToNextLevel() {
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ level: 13 }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = nextLevelUrl;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="{% static 'game/12/script.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knights & Queens - Level 14</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/14/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">
+            <i class="fas fa-home"></i> Return
+        </button>
+        <button class="next-level-button" onclick="goToNextLevel()">
+            <i class="fas fa-forward"></i> Next Level
+        </button>
+    </div>
+
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>Knights & Queens</h1>
+            <div class="game-description">
+                <h3>Royal Challenge:</h3>
+                <ul>
+                    <li>Place knights and queens strategically</li>
+                    <li>Avoid placing pieces in each other's attack range</li>
+                    <li>Control more territory than the AI opponent</li>
+                    <li>Complete the challenge within the time limit</li>
+                </ul>
+            </div>
+            <div class="difficulty-selector">
+                <h3>Select Difficulty</h3>
+                <div class="difficulty-buttons">
+                    <button data-difficulty="easy" class="selected">Squire</button>
+                    <button data-difficulty="medium">Knight</button>
+                    <button data-difficulty="hard">Royal Guard</button>
+                </div>
+            </div>
+            <button id="start-button">Begin Battle</button>
+        </div>
+
+        <!-- Game Board -->
+        <div id="game-board" class="hidden">
+            <div class="game-info">
+                <div class="player-stats">
+                    <div class="player-pieces">
+                        <div class="piece-count knight">
+                            <img src="{% static 'game/14/images/knight.png' %}" alt="Knight">
+                            <span>×3</span>
+                        </div>
+                        <div class="piece-count queen">
+                            <img src="{% static 'game/14/images/queen.png' %}" alt="Queen">
+                            <span>×2</span>
+                        </div>
+                    </div>
+                    <div class="territory-control">
+                        <div class="control-bar">
+                            <div class="player-control"></div>
+                            <div class="ai-control"></div>
+                        </div>
+                        <span class="control-percentage">50%</span>
+                    </div>
+                </div>
+                <div class="game-timer">
+                    <div class="timer-ring">
+                        <svg>
+                            <circle class="timer-circle" cx="30" cy="30" r="28"></circle>
+                        </svg>
+                        <span class="timer-value">3:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chess-board">
+                <!-- Board will be generated via JavaScript -->
+            </div>
+
+            <div class="piece-selector">
+                <div class="piece knight" draggable="true">
+                    <img src="{% static 'game/14/images/knight.png' %}" alt="Knight">
+                </div>
+                <div class="piece queen" draggable="true">
+                    <img src="{% static 'game/14/images/queen.png' %}" alt="Queen">
+                </div>
+            </div>
+
+            <div class="move-history">
+                <h3>Battle Log</h3>
+                <div class="history-list">
+                    <!-- Move history will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden">
+            <div class="result-container">
+                <h2>Battle Concluded</h2>
+                <div class="final-stats">
+                    <div class="stat">
+                        <span class="label">Territory Control</span>
+                        <span class="value" id="final-territory">65%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Pieces Placed</span>
+                        <span class="value" id="pieces-placed">5/5</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Time Remaining</span>
+                        <span class="value" id="time-remaining">1:45</span>
+                    </div>
+                </div>
+                <button id="restart-button">Fight Again</button>
+            </div>
+        </div>
+
+        <!-- Win Message -->
+        <div class="win-message" id="winMessage">
+            <div class="victory-banner">
+                <div class="crown-animation">
+                    <img src="{% static 'game/14/images/crown.png' %}" alt="Crown">
+                </div>
+                <h2>Victory Achieved! 👑</h2>
+            </div>
+            <div class="victory-stats">
+                <div class="stat">
+                    <span class="label">Strategic Rating</span>
+                    <span class="value" id="strategy-rating">Masterful</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Territory Dominated</span>
+                    <span class="value" id="territory-percentage">75%</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Battle Duration</span>
+                    <span class="value" id="battle-time">2:15</span>
+                </div>
+            </div>
+            <div class="win-buttons">
+                <button onclick="returnToLevels()">Return to Command</button>
+                <button onclick="goToNextLevel()">Next Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Validation Modal -->
+    <div id="validation-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Invalid Move</h3>
+            <p>This position is under attack!</p>
+            <button onclick="closeModal()">Understood</button>
+        </div>
+    </div>
+
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game15' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        const csrfToken = "{{ csrf_token }}";
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+        }
+        
+        function goToNextLevel() {
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ level: 15 }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = nextLevelUrl;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="{% static 'game/14/script.js' %}"></script>
+</body>
+</html>

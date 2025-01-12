@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>ISDF CLUB</title>
+    <style>
+        body {
+            background-color: #1a1a1a; /* Dark background */
+            color: #f0f0f0; /* Light text color */
+            font-family: 'Roboto', sans-serif; /* Transformer-like font */
+        }
+        .register-form {
+            background-color: rgba(0, 0, 0, 0.7); /* Dark transparent background */
+            padding: 40px; /* Increased padding */
+            border-radius: 10px;
+            max-width: 600px; /* Increased max-width */
+            margin: 0 auto; /* Center the form */
+            font-size: 1.2em; /* Slightly larger font */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow */
+        }
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+        }
+ 
+        .btn-primary {
+            background-color: #ffcc00; /* Transformer yellow color */
+            border: none;
+            color: #1a1a1a; /* Dark text color */
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #e6b800; /* Slightly darker yellow on hover */
+        }
+        a {
+            color: #ffcc00; /* Transformer yellow color */
+        }
+        a:hover {
+            color: #e6b800; /* Slightly darker yellow on hover */
+        }
+    </style>
+</head>
+<body>
+ 
+    <!-- Fixed Elements Container -->
+    <div class="fixed-elements">
+        <header class="header">
+            <img src="{% static 'images/Group 240.svg' %}" alt="Left Element" class="left-svg">
+            <h1 class="header-heading">REGISTERATION</h1>
+            <img src="{% static 'images/Group 239.svg' %}" alt="Right Element" class="right-svg">
+        </header>
+        <header class="Register">
+            <h1 class="Leaderboard-heading"><a href="{% url 'home' %}" style="color: inherit; text-decoration: none;">BACK TO GAME</a></h1>
+        </header> 
+    </div>
+
+    <!-- Scrollable Content -->
+    <main class="scrollable-content">
+        <!-- First Section -->
+        <section class="main-content">
+            <form method="POST" class="register-form">
+                {% csrf_token %}
+                
+                <!-- Form Fields -->
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+                
+                <!-- Submit Button -->
+                <br>
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+                <br>
+
+                <p class="text-center mt-3">
+                    <br>
+                    Already have an account? <a href="{% url 'Login' %}">Login here</a>
+                </p>
+            </form>
+        </section>
+    </main>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

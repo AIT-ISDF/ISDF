@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kakuro Puzzle - Level 9</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'game/9/style.css' %}">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>KAKURO</h1>
+            <div class="subtitle">Mathematical Crossword Puzzle</div>
+            <div class="instructions">
+                <p>Fill the grid with numbers 1-9 that sum to the given clues.</p>
+                <div class="example-grid">
+                    <img src="kakuro-example.png" alt="Kakuro Example">
+                </div>
+                <div class="rules-list">
+                    <h3>Rules:</h3>
+                    <ul>
+                        <li>Use numbers 1-9 only</li>
+                        <li>No number can be repeated in a sum</li>
+                        <li>Numbers must add up to the clue given</li>
+                        <li>Empty cells must be filled with a single digit</li>
+                    </ul>
+                </div>
+            </div>
+            <button id="start-game" class="start-button">START GAME</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <h2>KAKURO</h2>
+                <div class="game-controls">
+                    <button id="rules-btn" class="control-button">Rules</button>
+                    <button id="restart" class="control-button">Restart</button>
+                </div>
+            </div>
+
+            <div class="game-board">
+                <div id="kakuro-grid" class="grid"></div>
+                <div class="number-pad">
+                    <button class="num-btn" data-num="1">1</button>
+                    <button class="num-btn" data-num="2">2</button>
+                    <button class="num-btn" data-num="3">3</button>
+                    <button class="num-btn" data-num="4">4</button>
+                    <button class="num-btn" data-num="5">5</button>
+                    <button class="num-btn" data-num="6">6</button>
+                    <button class="num-btn" data-num="7">7</button>
+                    <button class="num-btn" data-num="8">8</button>
+                    <button class="num-btn" data-num="9">9</button>
+                    <button class="num-btn clear" data-num="0">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Modal -->
+        <div id="rules-modal" class="modal hidden">
+            <div class="modal-content">
+                <button id="close-rules" class="close-button">×</button>
+                <h2>How to Play Kakuro</h2>
+                <div class="rules-content">
+                    <div class="rules-section">
+                        <h3>Basic Rules:</h3>
+                        <ul>
+                            <li>Fill empty cells with numbers 1-9</li>
+                            <li>Numbers in each run must sum to the clue number</li>
+                            <li>No number can be repeated in a run</li>
+                            <li>Clues are given as sums for rows (→) and columns (↓)</li>
+                        </ul>
+                    </div>
+                    <div class="rules-section">
+                        <h3>How to Play:</h3>
+                        <ol>
+                            <li>Click an empty cell to select it</li>
+                            <li>Use the number pad to enter a number</li>
+                            <li>Click 'Clear' to remove a number</li>
+                            <li>Complete all runs to win the game</li>
+                        </ol>
+                    </div>
+                    <!-- <div class="example">
+                        <img src="kakuro-example.png" alt="Kakuro Example">
+                        <p>Example: A row with clue "16" could be filled with [9,7] or [8,3,5]</p>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+        <div id="level-complete" class="screen hidden">
+            <h2>Congratulations! 🎉</h2>
+            <p>You've completed Level 9!</p>
+            <div class="level-buttons">
+                <button onclick="returnToLevels()">Return to Levels</button>
+                <button onclick="goToNextLevel()">Next Level</button>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="win-screen" class="screen hidden">
+            <h2>Congratulations!</h2>
+            <div class="win-message">
+                <p>You've solved the Kakuro puzzle!</p>
+                <div class="sparkles"></div>
+            </div>
+            <div class="win-buttons">
+                <button id="play-again">Play Again</button>
+                <button id="new-game">New Game</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game10' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        
+      
+        
+        const csrfToken = "{{ csrf_token }}";
+        // Pass the Django URL to a global variable
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+            
+        }
+        function goToNextLevel() {
+          
+
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken, // Use CSRF token
+                },
+                body: JSON.stringify({ level: 10 }), // Example: Pass the next level
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log(`Level successfully updated to: ${data.level}`);
+                    window.location.href = nextLevelUrl; // Redirect to the next level
+                } else {
+                    console.error("Error from server:", data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+            });
+        }
+    </script>
+    <script src="{% static 'game/9/script.js' %}"></script>
+</body>
+</html>

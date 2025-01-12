@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>ISDF CLUB</title>
+    <style>
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: rgba(34, 34, 34, 0.9); /* Darker background */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 3D shadow */
+            border-radius: 10px; /* Rounded corners */
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #444; /* Darker border */
+            font-size: 18px; /* Larger text size */
+            color: #ddd; /* Light text color */
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Inner shadow for 3D effect */
+        }
+
+        th {
+            background: linear-gradient(to bottom, rgba(51, 51, 51, 0.9), rgba(51, 51, 51, 0.7)); /* Darker gradient background for header */
+            color: white; /* White text color */
+            text-shadow: 1px 1px 2px black; /* Text shadow for 3D effect */
+        }
+
+        tr:nth-child(even) {
+            background: rgba(46, 46, 46, 0.7); /* Darker background for even rows */
+        }
+
+        tr:hover {
+            background: rgba(70, 70, 70, 0.7); /* Highlight row on hover */
+        }
+
+ 
+
+     
+
+        .Leaderboard-heading a {
+            color: white;
+            text-shadow: 1px 1px 2px black; /* Text shadow for 3D effect */
+        }
+    </style>
+</head>
+<body>
+ 
+    <!-- Fixed Elements Container -->
+    <div class="fixed-elements">
+        <header class="header">
+            <img src="{% static 'images/Group 240.svg' %}" alt="Left Element" class="left-svg">
+            <h1 class="header-heading">LEADERBOARD</h1>
+            <img src="{% static 'images/Group 239.svg' %}" alt="Right Element" class="right-svg">
+        </header>
+        <header class="Register">
+            <h1 class="Leaderboard-heading"><a href="{% url 'home' %}" style="color: inherit; text-decoration: none;">BACK TO GAME</a></h1>
+        </header> 
+   
+    </div>
+
+    <!-- Scrollable Content -->
+    <main class="scrollable-content">
+        <!-- First Section -->
+        <section class="main-content">
+       
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Level Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in leaderboard %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td class="text-center">{{ entry.user.username }}</td>
+                        <td class="text-center">{{ entry.level }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        </section>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

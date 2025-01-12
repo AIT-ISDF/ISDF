@@ -1,0 +1,632 @@
+/* Custom Scrollbar Styles */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1F2025;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667B8A;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #FFD700;
+}
+
+
+
+@font-face {
+    font-family: 'CustomFont';
+    src: url('/static/transformers_movie/Transformers\ Movie.ttf') format('truetype');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+    background: url('/static/images/CRACKHUNT.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index:  0;
+}
+
+/* Fixed Elements Styles */
+.fixed-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.header {
+    position: fixed;         
+    top: 0;                  
+    left: 50%;               
+    transform: translateX(-50%);
+    width: 45%;             
+    height: 100px;           
+    z-index: 1000;          
+    background-color: #1F2025; 
+    border-radius: 0 0 20px 20px;
+    border: 3px solid gray;
+    border-top: 0px;
+    pointer-events: auto;
+}
+
+.Leaderboard {
+    position: fixed;         
+    top: 0;                  
+              
+    width: 20%;             
+    height: 100px;           
+    z-index: 1000;          
+    background-color: #1F2025; 
+    border-radius: 0 0 20px 20px;
+    border: 3px solid gray;
+    border-top: 0px;
+    pointer-events: auto;
+}
+
+.Register {
+    position: fixed;         
+    top: 0;     
+    right: 0;
+    width: 20%;             
+    height: 100px;           
+    z-index: 1000;          
+    background-color: #1F2025; 
+    border-radius: 0 0 20px 20px;
+    border: 3px solid gray;
+    border-top: 0px;
+    pointer-events: auto;
+}
+
+.Leaderboard-heading{
+    text-align: center;
+    margin: 0;
+    position: relative;
+    top: 43%;
+    transform: translateY(-50%);
+    color: whitesmoke;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 2rem;
+}
+
+.left-svg {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 4%;
+}
+
+.right-svg {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 4%;
+}
+
+.header-heading {
+    text-align: center;
+    margin: 0;
+    position: relative;
+    top: 43%;
+    transform: translateY(-50%);
+    color: whitesmoke;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 2rem;
+}
+
+.center-bot {
+    position: fixed;
+    bottom: 128px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+/* Scrollable Content Styles */
+.scrollable-content {
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.main-content {
+    min-height: 100vh;
+    position: relative;
+    padding-top: 120px;
+}
+
+.crack {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-top: 1vh;
+    margin-bottom: 20vh;
+}
+
+.crack h1 {
+    background: linear-gradient(60deg, #667B8A 30%, #FFE8B7 30%, #667B8A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    font-size: 5rem;
+    font-family: 'CustomFont', sans-serif;
+    font-weight: bold;
+}
+
+.side-bots-container {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+}
+
+.bot1 {
+    position: absolute;
+    left: 6%;
+    bottom: 40%;
+}
+
+.bot2 {
+    position: absolute;
+    right: 6%;
+    bottom: 40%;
+}
+
+/* Levels Section Styles */
+.levels-section {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 0;
+    pointer-events: auto;
+}
+
+.levels-container {
+    
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+.box {
+    position: absolute;
+    width: 25rem;
+    height: 100px;
+    margin: 100px;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.3s ease-out;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.box.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.box:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+.box:hover h1 {
+    color: #FFD700;
+}
+
+.level-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.level-content img {
+    width: 100%;
+    height: auto;
+}
+
+/* Box Positions */
+.top-left {
+    top: 1rem;
+    left: 1rem;
+    margin-top: 8rem;
+}
+
+.top-left .level-content img {
+    transform: rotateY(180deg);
+}
+
+.top-left h1 {
+    position: absolute;
+    top: 2rem;
+    right: 8rem;
+    color: aliceblue;
+    z-index: 10;
+    font-size: 3.5rem;
+    margin: 0;
+}
+
+.top-right {
+    top: 1rem;
+    right: 1rem;
+    margin-top: 8rem;
+}
+
+.top-right h1 {
+    position: absolute;
+    top: 2rem;
+    right: 5rem;
+    color: aliceblue;
+    z-index: 10;
+    font-size: 3.5rem;
+    margin: 0;
+}
+
+.bottom-left {
+    bottom: 1rem;
+    left: 1rem;
+    margin-bottom: 3rem;
+}
+
+.bottom-left .level-content img {
+    transform: rotate(180deg);
+}
+
+.bottom-left h1 {
+    position: absolute;
+    top: 2rem;
+    right: 8rem;
+    color: aliceblue;
+    z-index: 10;
+    font-size: 3.5rem;
+    margin: 0;
+}
+
+.bottom-right {
+    bottom: 1rem;
+    right: 1rem;
+    margin-bottom: 3rem;
+}
+
+.bottom-right .level-content img {
+    transform: rotateX(180deg);
+}
+
+.bottom-right h1 {
+    position: absolute;
+    top: 2rem;
+    right: 6rem;
+    color: aliceblue;
+    z-index: 10;
+    font-size: 3.5rem;
+    margin: 0;
+}
+
+/* Section Titles */
+.section-title {
+    text-align: center;
+    padding: 2rem 0;
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.5s ease-out;
+}
+
+.section-title.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.section-title h2 {
+    font-size: 3rem;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 5px;
+    margin: 0;
+}
+
+/* Level Lock Modal */
+.level-lock-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: #2a2a2a;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    max-width: 400px;
+    width: 90%;
+    animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content h2 {
+    color: #FF5722;
+    margin-bottom: 15px;
+}
+
+.modal-content button {
+    margin-top: 20px;
+    padding: 10px 30px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.modal-content button:hover {
+    background: #45a049;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .header {
+        width: 80%;
+    }
+
+    .crack h1 {
+        font-size: 3rem;
+    }
+
+    .box {
+        width: 18rem;
+        margin: 50px;
+    }
+
+    .box h1 {
+        font-size: 2.5rem;
+    }
+
+    .section-title h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+/* Add these media queries at the end of your CSS file */
+
+/* Large Screens (1200px and up) */
+@media (min-width: 1200px) {
+    .levels-container {
+        max-width: 1140px;
+        margin: 0 auto;
+    }
+}
+
+/* Medium Screens (992px to 1199px) */
+@media (max-width: 1199px) {
+    .box {
+        width: 20rem;
+        margin: 50px;
+    }
+
+    .top-left h1,
+    .top-right h1,
+    .bottom-left h1,
+    .bottom-right h1 {
+        font-size: 3rem;
+    }
+}
+
+/* Tablets (768px to 991px) */
+@media (max-width: 991px) {
+    .header {
+        width: 60%;
+    }
+
+    .Leaderboard,
+    .Register {
+        width: 25%;
+    }
+
+    .header-heading,
+    .Leaderboard-heading {
+        font-size: 1.5rem;
+    }
+
+    .box {
+        width: 16rem;
+        margin: 30px;
+    }
+
+    .top-left h1,
+    .top-right h1,
+    .bottom-left h1,
+    .bottom-right h1 {
+        font-size: 2.5rem;
+        right: 4rem;
+    }
+
+    .crack h1 {
+        font-size: 4rem;
+    }
+
+    .bot1,
+    .bot2 {
+        transform: scale(0.8);
+    }
+}
+
+/* Mobile Devices (576px to 767px) */
+@media (max-width: 767px) {
+    .header {
+        width: 100%;
+        border-radius: 0;
+    }
+
+    .Leaderboard,
+    .Register {
+        width: 50%;
+        top: 100px;
+    }
+
+    .Leaderboard {
+        left: 0;
+    }
+
+    .Register {
+        right: 0;
+    }
+
+    .main-content {
+        padding-top: 200px;
+    }
+
+    .levels-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        padding: 20px;
+    }
+
+    .box {
+        position: relative;
+        width: 90%;
+        max-width: 300px;
+        margin: 15px auto;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .top-left,
+    .top-right,
+    .bottom-left,
+    .bottom-right {
+        margin: 15px auto;
+    }
+
+    .crack h1 {
+        font-size: 3rem;
+    }
+
+    .bot1,
+    .bot2 {
+        display: none;
+    }
+
+    .center-bot {
+        transform: scale(0.7) translateX(-70%);
+        bottom: 50px;
+    }
+}
+
+/* Small Mobile Devices (up to 575px) */
+@media (max-width: 575px) {
+    .header-heading,
+    .Leaderboard-heading {
+        font-size: 1.2rem;
+    }
+
+    .crack h1 {
+        font-size: 2.5rem;
+    }
+
+    .box {
+        width: 85%;
+    }
+
+    .top-left h1,
+    .top-right h1,
+    .bottom-left h1,
+    .bottom-right h1 {
+        font-size: 2rem;
+        right: 3rem;
+    }
+
+    .left-svg,
+    .right-svg {
+        transform: scale(0.7) translateY(-70%);
+    }
+}
+
+/* Height-based media queries */
+@media (max-height: 800px) {
+    .levels-section {
+        padding: 50px 0;
+        min-height: auto;
+    }
+
+    .box {
+        margin: 30px;
+    }
+}
+
+/* Landscape orientation for mobile devices */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header {
+        height: 60px;
+    }
+
+    .Leaderboard,
+    .Register {
+        height: 60px;
+    }
+
+    .main-content {
+        padding-top: 80px;
+    }
+
+    .levels-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .box {
+        position: relative;
+        width: 100%;
+        margin: 10px;
+    }
+}

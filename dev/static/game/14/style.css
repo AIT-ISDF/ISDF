@@ -1,0 +1,259 @@
+:root {
+    --primary-color: #c0a080;
+    --secondary-color: #4a4a4a;
+    --board-light: #f0d9b5;
+    --board-dark: #b58863;
+    --highlight: #829769;
+    --attack-range: rgba(255, 0, 0, 0.3);
+    --valid-move: rgba(0, 255, 0, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #2c3e50, #3c4e60);
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+#game-container {
+    width: 1200px;
+    height: 800px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Start Screen Styles */
+#start-screen {
+    text-align: center;
+    padding: 40px;
+}
+
+.game-description {
+    max-width: 600px;
+    margin: 30px auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.difficulty-selector {
+    margin: 30px 0;
+}
+
+.difficulty-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.difficulty-buttons button {
+    padding: 10px 20px;
+    border: 2px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.difficulty-buttons button.selected {
+    background: var(--primary-color);
+    color: #000;
+}
+
+/* Game Board Styles */
+.chess-board {
+    width: 560px;
+    height: 560px;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    border: 5px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.square {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.square.light {
+    background-color: var(--board-light);
+}
+
+.square.dark {
+    background-color: var(--board-dark);
+}
+
+.square.highlight {
+    background-color: var(--highlight);
+}
+
+.square.attack-range::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--attack-range);
+}
+
+.piece {
+    width: 50px;
+    height: 50px;
+    cursor: grab;
+    transition: transform 0.3s ease;
+}
+
+.piece:hover {
+    transform: scale(1.1);
+}
+
+.piece img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Game Info Styles */
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.player-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.piece-count {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.territory-control {
+    width: 200px;
+}
+
+.control-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+}
+
+.player-control, .ai-control {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.player-control {
+    background: var(--primary-color);
+}
+
+.ai-control {
+    background: var(--secondary-color);
+}
+
+/* Timer Styles */
+.timer-ring {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.timer-circle {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s linear;
+}
+
+/* Move History Styles */
+.move-history {
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    width: 250px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.history-list {
+    height: 400px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.move-entry {
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+}
+
+/* Animation Classes */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    #game-container {
+        width: 95%;
+        height: auto;
+    }
+
+    .chess-board {
+        width: 400px;
+        height: 400px;
+    }
+
+    .square {
+        width: 50px;
+        height: 50px;
+    }
+
+    .piece {
+        width: 35px;
+        height: 35px;
+    }
+}

@@ -1,0 +1,161 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Matrix - Level 13</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/13/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">
+            <i class="fas fa-home"></i> Return
+        </button>
+        <button class="next-level-button" onclick="goToNextLevel()">
+            <i class="fas fa-forward"></i> Next Level
+        </button>
+    </div>
+
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>Word Matrix</h1>
+            <div class="instructions">
+                <h3>Mission Objectives:</h3>
+                <ul>
+                    <li>Decode scrambled words in the matrix</li>
+                    <li>Words can be horizontal or vertical</li>
+                    <li>All words are interconnected</li>
+                    <li>Complete the matrix before time runs out</li>
+                </ul>
+            </div>
+            <button id="start-button">Initialize Matrix</button>
+        </div>
+
+        <!-- Game Board -->
+        <div id="game-board" class="hidden">
+            <div class="matrix-container">
+                <div class="word-grid"></div>
+                <div class="clues-panel">
+                    <div class="horizontal-clues">
+                        <h3>Across</h3>
+                        <div class="clue-list" id="across-clues"></div>
+                    </div>
+                    <div class="vertical-clues">
+                        <h3>Down</h3>
+                        <div class="clue-list" id="down-clues"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-controls-panel">
+                <div class="timer">
+                    <span class="timer-label">Time Remaining</span>
+                    <span class="timer-value">05:00</span>
+                </div>
+                <div class="score">
+                    <span class="score-label">Score</span>
+                    <span class="score-value">0</span>
+                </div>
+                <div class="hints">
+                    <span class="hints-label">Hints Remaining</span>
+                    <span class="hints-value">3</span>
+                </div>
+            </div>
+
+            <div class="letter-bank">
+                <h3>Letter Bank</h3>
+                <div class="letter-tiles"></div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden">
+            <div class="result-container">
+                <h2>Matrix Incomplete</h2>
+                <div class="stats">
+                    <p>Words Decoded: <span id="words-completed">0</span></p>
+                    <p>Time Elapsed: <span id="time-elapsed">00:00</span></p>
+                    <p>Final Score: <span id="final-score">0</span></p>
+                </div>
+                <button id="restart-button">Reinitialize Matrix</button>
+            </div>
+        </div>
+
+        <!-- Win Message -->
+        <div class="win-message" id="winMessage">
+            <div class="success-animation">
+                <div class="checkmark-circle">
+                    <div class="checkmark"></div>
+                </div>
+            </div>
+            <h2>Matrix Successfully Decoded! 🎉</h2>
+            <div class="performance-metrics">
+                <div class="metric">
+                    <span class="label">Accuracy:</span>
+                    <span class="value" id="accuracy-rating">98%</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Time Bonus:</span>
+                    <span class="value" id="time-bonus">+500</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Final Score:</span>
+                    <span class="value" id="win-score">2500</span>
+                </div>
+            </div>
+            <div class="win-buttons">
+                <button onclick="returnToLevels()">Return to Hub</button>
+                <button onclick="goToNextLevel()">Next Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hint Modal -->
+    <div id="hint-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Use Hint</h3>
+            <p>Reveal one letter in the selected word?</p>
+            <div class="modal-buttons">
+                <button id="confirm-hint">Yes</button>
+                <button id="cancel-hint">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game14' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        const csrfToken = "{{ csrf_token }}";
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+        }
+        
+        function goToNextLevel() {
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ level: 14 }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = nextLevelUrl;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="{% static 'game/13/script.js' %}"></script>
+</body>
+</html>

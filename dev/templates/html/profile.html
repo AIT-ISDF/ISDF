@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>ISDF CLUB</title>
+    <style>
+     
+    </style>
+</head>
+<body>
+ 
+    <!-- Fixed Elements Container -->
+    <div class="fixed-elements">
+        <header class="header">
+
+            <img src="{% static 'images/Group 240.svg' %}" alt="Left Element" class="left-svg">
+            <h1 class="header-heading">YOUR PROFILE</h1>
+            <img src="{% static 'images/Group 239.svg' %}" alt="Right Element" class="right-svg">
+        </header>
+        <header class="Leaderboard">
+            <h1 class="Leaderboard-heading"><a href="{% url 'Logout' %}" style="color: inherit; text-decoration: none;">LOGOUT</a></h1>
+        </header>  
+        <header class="Register">
+            <h1 class="Leaderboard-heading"><a href="{% url 'home' %}" style="color: inherit; text-decoration: none;">BACK TO GAME</a></h1>
+        </header> 
+   
+    </div>
+
+    <!-- Scrollable Content -->
+    <main class="scrollable-content">
+        <!-- First Section -->
+        <section class="main-content">
+            {% if user.is_authenticated %}
+
+
+<!-- Profile Information -->
+<div class="profile-info">
+
+    <div class="profile-header">
+        <h1>{{ user.username|upper }}</h1>
+        <b><p style="color: white">Welcome to your profile!</p></b>
+    </div>
+    <br>
+    <br>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <br>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <br>
+
+   
+    <p><strong> {{ leaderboard_entry }}</strong></p>
+    <br>
+
+    <br>
+
+    
+
+</div>
+
+
+
+
+{% else %}
+<div class="no-account-message">
+    <p>You don't have an account. Please <a href="{% url 'Login' %}">log in</a> or <a href="{% url 'Register' %}">sign up</a>.</p>
+</div>
+{% endif %}
+
+<style>
+    .profile-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .profile-header h1 {
+        font-size: 2.5em;
+        color: #00ffcc; /* Adjusted to match the theme */
+    }
+
+    .profile-header p {
+        font-size: 1.2em;
+        color: #bbb;
+    }
+
+    .profile-info {
+        background-color: #1e1e1e; /* Dark background to match the theme */
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        color: #e0e0e0; /* Light text for contrast */
+    }
+
+    .profile-info p {
+        font-size: 1.1em;
+        color: #e0e0e0;
+    }
+
+    .separator {
+        height: 2px;
+        background-color: #333; /* Darker separator */
+        margin: 20px 0;
+    }
+
+    .challenge-list {
+        background-color: #1e1e1e; /* Dark background */
+        padding: 20px;
+        border-radius: 8px;
+        color: #e0e0e0; /* Light text */
+    }
+
+    .challenge-list h3 {
+        font-size: 1.8em;
+        color: #00ffcc; /* Accent color */
+        margin-bottom: 15px;
+    }
+
+    .challenge-item {
+        padding: 10px;
+        border-bottom: 1px solid #444; /* Slightly darker border */
+    }
+
+    .challenge-item strong {
+        font-size: 1.2em;
+        color: #fff; /* White text for challenge names */
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-light {
+        color: #999;
+    }
+
+    .no-account-message {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 1.2em;
+        color: #e0e0e0;
+    }
+
+    .no-account-message a {
+        color: #00ffcc;
+        text-decoration: underline;
+    }
+</style>
+
+        </section>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

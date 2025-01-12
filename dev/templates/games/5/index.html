@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/5/style.css' %}">
+    <title>Sudoku - Level 5</title>
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+
+    <div class="container">
+        <h1>Sudoku Game</h1>
+        <div class="sudoku-board" id="sudoku-board"></div>
+        <button id="check-answer">Check Answer</button>
+        <p id="feedback"></p>
+    </div>
+
+    <div class="win-message" id="winMessage">
+        <h2>Congratulations! 🎉</h2>
+        <p>You've completed Level 5!</p>
+        <div class="win-buttons">
+            <button onclick="returnToLevels()">Return to Levels</button>
+            <button onclick="goToNextLevel()">Next Level</button>
+        </div>
+    </div>
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game6' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        
+      
+        
+        const csrfToken = "{{ csrf_token }}";
+        // Pass the Django URL to a global variable
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+            
+        }
+        function goToNextLevel() {
+          
+
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken, // Use CSRF token
+                },
+                body: JSON.stringify({ level: 6 }), // Example: Pass the next level
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log(`Level successfully updated to: ${data.level}`);
+                    window.location.href = nextLevelUrl; // Redirect to the next level
+                } else {
+                    console.error("Error from server:", data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+            });
+        }
+    </script>
+    <script src="{% static 'game/5/script.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hangman - Level 2</title>
+    <link rel="stylesheet" href="{% static 'game/2/style.css' %}">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+
+    <h1>Hangman Game</h1>
+
+    <div class="game-container">
+        <!-- Word Display -->
+        <div class="word-display" id="wordDisplay"></div>
+
+        <!-- Message Display -->
+        <div class="message" id="message"></div>
+
+        <!-- Hangman Drawing -->
+        <canvas id="hangmanCanvas" width="200" height="200"></canvas>
+
+        <!-- Alphabet Buttons -->
+        <div class="alphabet" id="alphabet"></div>
+
+        <!-- Restart Button -->
+        <button id="restartButton">Restart Game</button>
+    </div>
+
+    <div class="win-message" id="winMessage">
+        <h2>Congratulations! 🎉</h2>
+        <p>You've completed Level 2!</p>
+        <div class="win-buttons">
+            <button onclick="returnToLevels()">Return to Levels</button>
+            <button onclick="goToNextLevel()">Next Level</button>
+        </div>
+    </div>
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game3' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        
+      
+        
+        const csrfToken = "{{ csrf_token }}";
+        // Pass the Django URL to a global variable
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+            
+        }
+        function goToNextLevel() {
+          
+
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken, // Use CSRF token
+                },
+                body: JSON.stringify({ level: 3 }), // Example: Pass the next level
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log(`Level successfully updated to: ${data.level}`);
+                    window.location.href = nextLevelUrl; // Redirect to the next level
+                } else {
+                    console.error("Error from server:", data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+            });
+        }
+    </script>
+    <script src="{% static 'game/2/script.js' %}"></script>
+</body>
+</html>
