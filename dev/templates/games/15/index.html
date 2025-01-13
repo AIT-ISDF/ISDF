@@ -1,0 +1,110 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Relationship Puzzle - Level 15</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/15/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">
+            <i class="fas fa-home"></i> Return
+        </button>
+        <button class="next-level-button" onclick="goToNextLevel()">
+            <i class="fas fa-forward"></i> Next Level
+        </button>
+    </div>
+
+    <div id="game-container">
+        <div class="header">
+            <h1>Tree Relationship Puzzle</h1>
+            <div class="level-indicator">Level 15</div>
+            <p>Deduce the root node from the given relationships</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="timer">00:00</div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="tree-canvas" id="tree-canvas">
+                <!-- Nodes will be generated here -->
+            </div>
+
+            <div class="relationships-panel">
+                <div id="relationships">
+                    <!-- Relationships will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="checkSolution()">Check Solution</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="win-message" id="winMessage">
+            <div class="success-animation">
+                <div class="checkmark-circle">
+                    <div class="checkmark"></div>
+                </div>
+            </div>
+            <h2>Challenge Complete! 🎉</h2>
+            <div class="performance-metrics">
+                <div class="metric">
+                    <span class="label">Time Taken:</span>
+                    <span class="value" id="final-time">00:00</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Final Score:</span>
+                    <span class="value" id="final-score">1000</span>
+                </div>
+            </div>
+            <div class="win-buttons">
+                <button onclick="returnToLevels()">Return to Hub</button>
+                <button onclick="goToNextLevel()">Next Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const homeUrl = "{% url 'home' %}";
+        const nextLevelUrl = "{% url 'game16' %}";
+        const updateLevelUrl = "{% url 'update_level' %}";
+        const csrfToken = "{{ csrf_token }}";
+        
+        function returnToLevels() {
+            window.location.href = homeUrl;
+        }
+        
+        function goToNextLevel() {
+            fetch(updateLevelUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ level: 16 }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = nextLevelUrl;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="{% static 'game/15/script.js' %}"></script>
+</body>
+</html>
