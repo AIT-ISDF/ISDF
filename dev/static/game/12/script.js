@@ -1,381 +1,320 @@
+// Check level progress
 document.addEventListener('DOMContentLoaded', function() {
     const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
     if (12 > currentProgress) {
         window.location.href = '../index.html';
         return;
     }
-
     initializeGame();
 });
 
 // Game Configuration
 const GAME_CONFIG = {
-    timeLimit: 180, // 3 minutes in seconds
-    gridSize: 8,
-    maxErrors: 3,
-    components: [
-        {
-            type: 'powerSource',
-            voltage: 12,
-            maxConnections: 2,
-            sprite: 'power-source.png'
+    difficulties: {
+        easy: {
+            size: 15,
+            timeLimit: 300,
+            moveLimit: 100
         },
-        {
-            type: 'transformer',
-            ratio: 0.5,
-            maxConnections: 4,
-            sprite: 'transformer.png'
+        medium: {
+            size: 20,
+            timeLimit: 240,
+            moveLimit: 150
         },
-        {
-            type: 'capacitor',
-            capacity: 1000,
-            maxConnections: 2,
-            sprite: 'capacitor.png'
-        },
-        {
-            type: 'resistor',
-            resistance: 100,
-            maxConnections: 2,
-            sprite: 'resistor.png'
-        },
-        {
-            type: 'diode',
-            maxConnections: 2,
-            sprite: 'diode.png'
+        hard: {
+            size: 25,
+            timeLimit: 180,
+            moveLimit: 200
         }
-    ],
-    requiredVoltages: [
-        { node: [3, 4], target: 5, tolerance: 0.2 },
-        { node: [6, 7], target: 3.3, tolerance: 0.1 },
-        { node: [2, 5], target: 9, tolerance: 0.5 }
-    ]
+    }
 };
 
 // Game State
 let gameState = {
-    running: false,
-    timeRemaining: GAME_CONFIG.timeLimit,
-    errors: 0,
-    components: [],
-    connections: [],
-    selectedComponent: null,
-    voltages: new Array(GAME_CONFIG.gridSize * GAME_CONFIG.gridSize).fill(0),
-    timer: null
+    maze: [],
+    playerPos: { x: 1, y: 1 },
+    endPos: { x: 0, y: 0 },
+    moves: 0,
+    timeRemaining: 300,
+    timer: null,
+    gameRunning: false,
+    difficulty: 'medium',
+    visitedCells: new Set(),
+    optimalPath: 0
 };
-// Component Management
-function createComponentTray() {
-    const tray = document.querySelector('.component-tray');
-    GAME_CONFIG.components.forEach(component => {
-        const componentElement = createComponentElement(component);
-        tray.appendChild(componentElement);
+
+// Initialize Game
+function initializeGame() {
+    setupEventListeners();
+    setupDifficultySelection();
+}
+
+function setupEventListeners() {
+    document.getElementById('start-button').addEventListener('click', startGame);
+    document.getElementById('restart-button').addEventListener('click', restartGame);
+    document.addEventListener('keydown', handleKeyPress);
+
+    // Difficulty selection
+    document.querySelectorAll('.difficulty-buttons button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            document.querySelectorAll('.difficulty-buttons button').forEach(b => 
+                b.classList.remove('selected'));
+            e.target.classList.add('selected');
+            gameState.difficulty = e.target.dataset.difficulty;
+        });
     });
 }
 
-function createComponentElement(component) {
-    const element = document.createElement('div');
-    element.className = 'component';
-    element.draggable = true;
-    element.dataset.type = component.type;
+function startGame() {
+    const config = GAME_CONFIG.difficulties[gameState.difficulty];
     
-    const sprite = document.createElement('img');
-    sprite.src = `{% static 'game/12/images/${component.sprite}' %}`;
-    sprite.alt = component.type;
-    
-    const label = document.createElement('span');
-    label.textContent = component.type;
-    
-    element.appendChild(sprite);
-    element.appendChild(label);
-    
-    return element;
-}
-
-function createCircuitGrid() {
-    const grid = document.querySelector('.circuit-grid');
-    for (let i = 0; i < GAME_CONFIG.gridSize * GAME_CONFIG.gridSize; i++) {
-        const cell = createGridCell(i);
-        grid.appendChild(cell);
-    }
-}
-
-function createGridCell(index) {
-    const cell = document.createElement('div');
-    cell.className = 'grid-cell';
-    cell.dataset.index = index;
-    
-    // Add connection points
-    const connectionPoints = document.createElement('div');
-    connectionPoints.className = 'connection-points';
-    ['top', 'right', 'bottom', 'left'].forEach(direction => {
-        const point = document.createElement('div');
-        point.className = `connection-point ${direction}`;
-        point.dataset.direction = direction;
-        connectionPoints.appendChild(point);
-    });
-    
-    cell.appendChild(connectionPoints);
-    return cell;
-}
-
-// Drag and Drop Handlers
-function handleDragStart(e) {
-    if (!gameState.running) return;
-    
-    e.dataTransfer.setData('text/plain', e.target.dataset.type);
-    e.target.classList.add('dragging');
-}
-
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-}
-
-function handleDragOver(e) {
-    if (!gameState.running) return;
-    
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-}
-
-function handleDrop(e) {
-    if (!gameState.running) return;
-    
-    e.preventDefault();
-    const componentType = e.dataTransfer.getData('text/plain');
-    const cell = e.target.closest('.grid-cell');
-    
-    if (cell && !cell.hasComponent) {
-        placeComponent(componentType, cell);
-    }
-}
-
-function placeComponent(type, cell) {
-    const component = GAME_CONFIG.components.find(c => c.type === type);
-    if (!component) return;
-    
-    const componentInstance = {
-        ...component,
-        id: generateUniqueId(),
-        position: parseInt(cell.dataset.index),
-        connections: []
+    gameState = {
+        maze: [],
+        playerPos: { x: 1, y: 1 },
+        endPos: { x: 0, y: 0 },
+        moves: 0,
+        timeRemaining: config.timeLimit,
+        timer: null,
+        gameRunning: true,
+        difficulty: gameState.difficulty,
+        visitedCells: new Set(),
+        optimalPath: 0
     };
-    
-    gameState.components.push(componentInstance);
-    renderComponent(componentInstance, cell);
-    cell.hasComponent = true;
+
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('game-board').classList.remove('hidden');
+
+    generateMaze(config.size);
+    calculateOptimalPath();
+    startTimer();
+    updateDisplay();
 }
 
-// Connection Management
-function handleCellClick(e) {
-    if (!gameState.running) return;
-    
-    const cell = e.target.closest('.grid-cell');
-    const connectionPoint = e.target.closest('.connection-point');
-    
-    if (!connectionPoint) return;
-    
-    if (!gameState.selectedComponent) {
-        selectConnectionPoint(cell, connectionPoint);
-    } else {
-        tryCreateConnection(cell, connectionPoint);
-    }
-}
+function generateMaze(size) {
+    // Initialize maze with walls
+    gameState.maze = Array(size).fill().map(() => Array(size).fill(1));
 
-function selectConnectionPoint(cell, point) {
-    const component = findComponentInCell(cell);
-    if (!component || component.connections.length >= component.maxConnections) return;
-    
-    gameState.selectedComponent = {
-        component,
-        point: point.dataset.direction,
-        cell
-    };
-    point.classList.add('selected');
-}
+    function carve(x, y) {
+        gameState.maze[y][x] = 0;
 
-function tryCreateConnection(cell, point) {
-    const targetComponent = findComponentInCell(cell);
-    if (!targetComponent || 
-        targetComponent.id === gameState.selectedComponent.component.id ||
-        targetComponent.connections.length >= targetComponent.maxConnections) {
-        cancelConnection();
-        return;
-    }
-    
-    createConnection(gameState.selectedComponent, {
-        component: targetComponent,
-        point: point.dataset.direction,
-        cell
-    });
-}
+        // Randomize directions
+        const directions = [
+            [0, -2], // Up
+            [2, 0],  // Right
+            [0, 2],  // Down
+            [-2, 0]  // Left
+        ].sort(() => Math.random() - 0.5);
 
-function createConnection(start, end) {
-    const connection = {
-        id: generateUniqueId(),
-        start: {
-            componentId: start.component.id,
-            point: start.point
-        },
-        end: {
-            componentId: end.component.id,
-            point: end.point
+        for (let [dx, dy] of directions) {
+            const newX = x + dx;
+            const newY = y + dy;
+
+            if (newX > 0 && newX < size - 1 && 
+                newY > 0 && newY < size - 1 && 
+                gameState.maze[newY][newX] === 1) {
+                gameState.maze[y + dy/2][x + dx/2] = 0;
+                carve(newX, newY);
+            }
         }
-    };
+    }
+
+    // Start carving from position (1,1)
+    carve(1, 1);
+
+    // Set start and end positions
+    gameState.playerPos = { x: 1, y: 1 };
+    gameState.endPos = { x: size - 2, y: size - 2 };
     
-    gameState.connections.push(connection);
-    start.component.connections.push(connection.id);
-    end.component.connections.push(connection.id);
-    
-    renderConnection(connection);
-    clearConnectionSelection();
+    renderMaze();
 }
 
-// Rendering Functions
-function renderComponent(component, cell) {
-    const componentElement = document.createElement('div');
-    componentElement.className = 'placed-component';
-    componentElement.dataset.componentId = component.id;
-    
-    const sprite = document.createElement('img');
-    sprite.src = `{% static 'game/12/images/${component.sprite}' %}`;
-    sprite.alt = component.type;
-    
-    componentElement.appendChild(sprite);
-    cell.appendChild(componentElement);
+function calculateOptimalPath() {
+    const visited = new Set();
+    const queue = [{
+        x: gameState.playerPos.x,
+        y: gameState.playerPos.y,
+        steps: 0
+    }];
+
+    while (queue.length > 0) {
+        const current = queue.shift();
+        const key = `${current.x},${current.y}`;
+
+        if (current.x === gameState.endPos.x && current.y === gameState.endPos.y) {
+            gameState.optimalPath = current.steps;
+            break;
+        }
+
+        if (visited.has(key)) continue;
+        visited.add(key);
+
+        // Check all four directions
+        const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+        for (let [dx, dy] of directions) {
+            const newX = current.x + dx;
+            const newY = current.y + dy;
+
+            if (isValidMove(newX, newY)) {
+                queue.push({
+                    x: newX,
+                    y: newY,
+                    steps: current.steps + 1
+                });
+            }
+        }
+    }
 }
 
-function renderConnection(connection) {
-    const startCell = findCellByComponentId(connection.start.componentId);
-    const endCell = findCellByComponentId(connection.end.componentId);
-    
-    const wire = createWireElement(
-        getConnectionPointCoordinates(startCell, connection.start.point),
-        getConnectionPointCoordinates(endCell, connection.end.point)
-    );
-    
-    document.querySelector('.circuit-grid').appendChild(wire);
+function renderMaze() {
+    const mazeElement = document.getElementById('maze');
+    mazeElement.style.gridTemplateColumns = `repeat(${gameState.maze.length}, 1fr)`;
+    mazeElement.innerHTML = '';
+
+    for (let y = 0; y < gameState.maze.length; y++) {
+        for (let x = 0; x < gameState.maze.length; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+
+            if (x === gameState.playerPos.x && y === gameState.playerPos.y) {
+                cell.classList.add('player');
+            } else if (x === gameState.endPos.x && y === gameState.endPos.y) {
+                cell.classList.add('end');
+            } else if (gameState.maze[y][x] === 1) {
+                cell.classList.add('wall');
+            } else if (gameState.visitedCells.has(`${x},${y}`)) {
+                cell.classList.add('visited');
+            }
+
+            mazeElement.appendChild(cell);
+        }
+    }
 }
 
-function createWireElement(start, end) {
-    const wire = document.createElement('div');
-    wire.className = 'wire';
-    
-    const length = calculateDistance(start, end);
-    const angle = calculateAngle(start, end);
-    
-    wire.style.width = `${length}px`;
-    wire.style.transform = `rotate(${angle}deg)`;
-    wire.style.left = `${start.x}px`;
-    wire.style.top = `${start.y}px`;
-    
-    return wire;
+function handleKeyPress(e) {
+    if (!gameState.gameRunning) return;
+
+    let dx = 0, dy = 0;
+
+    switch(e.key) {
+        case 'ArrowUp':
+            dy = -1;
+            break;
+        case 'ArrowDown':
+            dy = 1;
+            break;
+        case 'ArrowLeft':
+            dx = -1;
+            break;
+        case 'ArrowRight':
+            dx = 1;
+            break;
+        default:
+            return;
+    }
+
+    movePlayer(dx, dy);
 }
 
-// Utility Functions
-function generateUniqueId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+function movePlayer(dx, dy) {
+    const newX = gameState.playerPos.x + dx;
+    const newY = gameState.playerPos.y + dy;
+
+    if (isValidMove(newX, newY)) {
+        gameState.visitedCells.add(`${gameState.playerPos.x},${gameState.playerPos.y}`);
+        gameState.playerPos = { x: newX, y: newY };
+        gameState.moves++;
+        
+        updateDisplay();
+        renderMaze();
+
+        if (newX === gameState.endPos.x && newY === gameState.endPos.y) {
+            winGame();
+        }
+    }
 }
 
-function findComponentInCell(cell) {
-    const index = parseInt(cell.dataset.index);
-    return gameState.components.find(c => c.position === index);
+function isValidMove(x, y) {
+    return x >= 0 && x < gameState.maze.length &&
+           y >= 0 && y < gameState.maze.length &&
+           gameState.maze[y][x] !== 1;
 }
 
-function findCellByComponentId(componentId) {
-    const component = gameState.components.find(c => c.id === componentId);
-    return document.querySelector(`.grid-cell[data-index="${component.position}"]`);
+function startTimer() {
+    clearInterval(gameState.timer);
+    gameState.timer = setInterval(() => {
+        if (gameState.timeRemaining > 0) {
+            gameState.timeRemaining--;
+            updateDisplay();
+            
+            if (gameState.timeRemaining === 0) {
+                gameOver('Time\'s up!');
+            }
+        }
+    }, 1000);
 }
 
-function getConnectionPointCoordinates(cell, direction) {
-    const rect = cell.getBoundingClientRect();
-    const gridRect = document.querySelector('.circuit-grid').getBoundingClientRect();
-    
-    const point = cell.querySelector(`.connection-point.${direction}`);
-    const pointRect = point.getBoundingClientRect();
-    
-    return {
-        x: pointRect.left - gridRect.left + pointRect.width / 2,
-        y: pointRect.top - gridRect.top + pointRect.height / 2
-    };
-}
+function updateDisplay() {
+    // Update moves
+    document.getElementById('moves').textContent = gameState.moves;
 
-function calculateDistance(point1, point2) {
-    return Math.sqrt(
-        Math.pow(point2.x - point1.x, 2) + 
-        Math.pow(point2.y - point1.y, 2)
-    );
-}
-
-function calculateAngle(point1, point2) {
-    return Math.atan2(point2.y - point1.y, point2.x - point1.x) * 180 / Math.PI;
-}
-
-function calculateVoltageEfficiency() {
-    let totalDeviation = 0;
-    let measurementPoints = 0;
-    
-    GAME_CONFIG.requiredVoltages.forEach(req => {
-        const actualVoltage = gameState.voltages[req.node[0] * GAME_CONFIG.gridSize + req.node[1]];
-        totalDeviation += Math.abs(actualVoltage - req.target) / req.target;
-        measurementPoints++;
-    });
-    
-    return Math.max(0, 100 - (totalDeviation / measurementPoints) * 100);
-}
-
-function updateStatusDisplay() {
-    // Update time display
+    // Update timer
     const minutes = Math.floor(gameState.timeRemaining / 60);
     const seconds = gameState.timeRemaining % 60;
-    document.querySelector('.time-value').textContent = 
+    document.getElementById('timer').textContent = 
         `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    // Update error counter
-    document.querySelector('.error-value').textContent = 
-        `${gameState.errors}/${GAME_CONFIG.maxErrors}`;
-    
-    // Update voltage meter
-    updateVoltageMeter();
 }
 
-function updateVoltageMeter() {
-    const averageVoltage = gameState.voltages.reduce((a, b) => a + b, 0) / gameState.voltages.length;
-    const percentage = (averageVoltage / 12) * 100; // 12V is max voltage
-    
-    document.querySelector('.meter-value').textContent = `${averageVoltage.toFixed(1)}V`;
-    document.querySelector('.meter-fill').style.width = `${percentage}%`;
+function calculateEfficiency() {
+    const moveEfficiency = Math.max(0, 1 - (gameState.moves - gameState.optimalPath) / gameState.optimalPath);
+    const timeEfficiency = gameState.timeRemaining / GAME_CONFIG.difficulties[gameState.difficulty].timeLimit;
+    return Math.round((moveEfficiency * 0.6 + timeEfficiency * 0.4) * 100);
 }
 
-function clearConnectionSelection() {
-    if (gameState.selectedComponent) {
-        const point = gameState.selectedComponent.cell
-            .querySelector(`.connection-point.${gameState.selectedComponent.point}`);
-        point.classList.remove('selected');
-        gameState.selectedComponent = null;
+function winGame() {
+    gameState.gameRunning = false;
+    clearInterval(gameState.timer);
+
+    const efficiency = calculateEfficiency();
+    const timeBonus = gameState.timeRemaining * 10;
+
+    document.getElementById('efficiency-rating').textContent = `${efficiency}%`;
+    document.getElementById('total-moves').textContent = gameState.moves;
+    document.getElementById('time-bonus').textContent = `+${timeBonus}`;
+
+    document.getElementById('winMessage').style.display = 'block';
+    document.querySelector('.next-level-button').style.display = 'block';
+
+    completeLevel(12);
+}
+
+function gameOver(message) {
+    gameState.gameRunning = false;
+    clearInterval(gameState.timer);
+
+    document.getElementById('game-board').classList.add('hidden');
+    document.getElementById('game-over-screen').classList.remove('hidden');
+    
+    document.getElementById('final-moves').textContent = gameState.moves;
+    document.getElementById('time-elapsed').textContent = formatTime(
+        GAME_CONFIG.difficulties[gameState.difficulty].timeLimit - gameState.timeRemaining
+    );
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function completeLevel(levelNumber) {
+    const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
+    if (levelNumber === currentProgress) {
+        localStorage.setItem('levelProgress', (currentProgress + 1).toString());
     }
 }
 
-function cancelConnection() {
-    clearConnectionSelection();
-}
-
-// Error Handling
-function handleError(message) {
-    gameState.errors++;
-    updateStatusDisplay();
-    
-    if (gameState.errors >= GAME_CONFIG.maxErrors) {
-        gameOver(false);
-    }
-    
-    // Show error message
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'error-message';
-    errorMessage.textContent = message;
-    document.body.appendChild(errorMessage);
-    
-    setTimeout(() => {
-        errorMessage.remove();
-    }, 3000);
+function restartGame() {
+    startGame();
 }
 
 // Initialize game when document is loaded

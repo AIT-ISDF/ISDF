@@ -1,161 +1,104 @@
-{% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Matrix - Level 13</title>
+    <title>Level 13</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'game/13/style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-controls">
-        <button class="return-button" onclick="returnToLevels()">
-            <i class="fas fa-home"></i> Return
-        </button>
-        <button class="next-level-button" onclick="goToNextLevel()">
-            <i class="fas fa-forward"></i> Next Level
-        </button>
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
     </div>
-
-    <div id="game-container">
+    <div class="container">
         <!-- Start Screen -->
-        <div id="start-screen">
-            <h1>Word Matrix</h1>
+        <div id="start-screen" class="screen">
+            <h1>MINESWEEPER</h1>
             <div class="instructions">
-                <h3>Mission Objectives:</h3>
-                <ul>
-                    <li>Decode scrambled words in the matrix</li>
-                    <li>Words can be horizontal or vertical</li>
-                    <li>All words are interconnected</li>
-                    <li>Complete the matrix before time runs out</li>
-                </ul>
+                <p>🖱️ Left Click: Reveal tile</p>
+                <p>🖱️ Right Click: Place/Remove flag (O)</p>
+                <p>💣 Mines: 15</p>
+                <p>🎯 Win by:</p>
+                <p class="sub-instruction">- Flagging all mines correctly</p>
+                <p class="sub-instruction">- Revealing all safe tiles</p>
             </div>
-            <button id="start-button">Initialize Matrix</button>
+            <button id="play-button">PLAY GAME</button>
         </div>
 
-        <!-- Game Board -->
-        <div id="game-board" class="hidden">
-            <div class="matrix-container">
-                <div class="word-grid"></div>
-                <div class="clues-panel">
-                    <div class="horizontal-clues">
-                        <h3>Across</h3>
-                        <div class="clue-list" id="across-clues"></div>
-                    </div>
-                    <div class="vertical-clues">
-                        <h3>Down</h3>
-                        <div class="clue-list" id="down-clues"></div>
-                    </div>
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <div class="game-info">
+                    <span id="flags-left">Flags: 20</span>
+                    <span id="time">Time: 0s</span>
                 </div>
+                <button id="restart">Restart Game</button>
             </div>
+            <div id="grid" class="grid"></div>
+        </div>
 
-            <div class="game-controls-panel">
-                <div class="timer">
-                    <span class="timer-label">Time Remaining</span>
-                    <span class="timer-value">05:00</span>
-                </div>
-                <div class="score">
-                    <span class="score-label">Score</span>
-                    <span class="score-value">0</span>
-                </div>
-                <div class="hints">
-                    <span class="hints-label">Hints Remaining</span>
-                    <span class="hints-value">3</span>
-                </div>
-            </div>
-
-            <div class="letter-bank">
-                <h3>Letter Bank</h3>
-                <div class="letter-tiles"></div>
+        <div id="level-complete" class="screen hidden">
+            <h2 class="win-message">Congratulations!</h2>
+            <p>You've completed Level 13!</p>
+            <div class="level-buttons">
+                <button onclick="returnToLevels()">Return to Levels</button>
+                <button onclick="goToNextLevel()">Next Level</button>
             </div>
         </div>
 
         <!-- Game Over Screen -->
-        <div id="game-over-screen" class="hidden">
-            <div class="result-container">
-                <h2>Matrix Incomplete</h2>
-                <div class="stats">
-                    <p>Words Decoded: <span id="words-completed">0</span></p>
-                    <p>Time Elapsed: <span id="time-elapsed">00:00</span></p>
-                    <p>Final Score: <span id="final-score">0</span></p>
-                </div>
-                <button id="restart-button">Reinitialize Matrix</button>
-            </div>
-        </div>
-
-        <!-- Win Message -->
-        <div class="win-message" id="winMessage">
-            <div class="success-animation">
-                <div class="checkmark-circle">
-                    <div class="checkmark"></div>
-                </div>
-            </div>
-            <h2>Matrix Successfully Decoded! 🎉</h2>
-            <div class="performance-metrics">
-                <div class="metric">
-                    <span class="label">Accuracy:</span>
-                    <span class="value" id="accuracy-rating">98%</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Time Bonus:</span>
-                    <span class="value" id="time-bonus">+500</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Final Score:</span>
-                    <span class="value" id="win-score">2500</span>
-                </div>
-            </div>
-            <div class="win-buttons">
-                <button onclick="returnToLevels()">Return to Hub</button>
-                <button onclick="goToNextLevel()">Next Challenge</button>
-            </div>
+        <div id="game-over-screen" class="screen hidden">
+            <h2 id="game-over-text"></h2>
+            <p id="final-time"></p>
+            <p id="result-message"></p>
+            <button id="restart-over">Play Again</button>
         </div>
     </div>
-
-    <!-- Hint Modal -->
-    <div id="hint-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Use Hint</h3>
-            <p>Reveal one letter in the selected word?</p>
-            <div class="modal-buttons">
-                <button id="confirm-hint">Yes</button>
-                <button id="cancel-hint">No</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const homeUrl = "{% url 'home' %}";
         const nextLevelUrl = "{% url 'game14' %}";
         const updateLevelUrl = "{% url 'update_level' %}";
+        
+      
+        
         const csrfToken = "{{ csrf_token }}";
+        // Pass the Django URL to a global variable
         
         function returnToLevels() {
             window.location.href = homeUrl;
+            
         }
-        
         function goToNextLevel() {
+          
+
             fetch(updateLevelUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
+                    'X-CSRFToken': csrfToken, // Use CSRF token
                 },
-                body: JSON.stringify({ level: 14 }),
+                body: JSON.stringify({ level: 7 }), // Example: Pass the next level
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    window.location.href = nextLevelUrl;
+                    console.log(`Level successfully updated to: ${data.level}`);
+                    window.location.href = nextLevelUrl; // Redirect to the next level
+                } else {
+                    console.error("Error from server:", data.error);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error("Fetch error:", error);
+            });
         }
     </script>
-    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
     <script src="{% static 'game/13/script.js' %}"></script>
 </body>
 </html>

@@ -1,196 +1,81 @@
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Press Start 2P', cursive;
-    background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
-    color: white;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container {
+    font-family: Arial, sans-serif;
     text-align: center;
-    padding: 20px;
-}
-
-.screen {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-.hidden {
-    display: none;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
-    font-size: 2.5em;
-    margin-bottom: 30px;
-    color: #00ff00;
-    text-shadow: 0 0 10px #00ff00;
+    margin-top: 50px;
+    color: #333;
 }
 
-.instructions {
-    margin: 30px 0;
-    text-align: left;
+.game-container {
+    margin: 0 auto;
+    width: 300px;
+    padding-bottom: 50px;
 }
 
-.instructions p {
-    margin: 15px 0;
-    font-size: 0.8em;
-    color: #fff;
-}
-
-.sub-instruction {
-    padding-left: 20px;
-    font-size: 0.7em !important;
-    color: #aaa !important;
-}
-
-button {
-    font-family: 'Press Start 2P', cursive;
-    padding: 15px 30px;
-    font-size: 1em;
-    cursor: pointer;
-    background: #00ff00;
-    border: none;
-    border-radius: 5px;
-    color: #000;
-    transition: all 0.3s ease;
-}
-
-button:hover {
-    background: #00cc00;
-    transform: scale(1.05);
-}
-
-.game-header {
+.word-display {
+    font-size: 36px;
+    letter-spacing: 10px;
     margin-bottom: 20px;
+    color: #333;
 }
 
-.game-info {
+.message {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #ff3333;
+}
+
+.alphabet {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    font-size: 0.8em;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(10, 40px);
-    gap: 1px;
-    background-color: #666;
-    padding: 5px;
-    border-radius: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 300px;
     margin: 0 auto;
 }
 
-.cell {
+.alphabet button {
     width: 40px;
     height: 40px;
-    background-color: #999;
-    border: 2px outset #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
+    margin: 5px;
+    font-size: 18px;
     cursor: pointer;
-    transition: all 0.2s;
+    background-color: #fff;
+    border: 2px solid #333;
+    color: #333;
 }
 
-.cell:hover {
-    background-color: #888;
+.alphabet button:hover {
+    background-color: #e6e6e6;
 }
 
-.revealed {
-    background-color: #666;
-    border: 1px solid #444;
+.alphabet button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
-.mine {
-    background-color: #ff0000;
-}
-
-.flag {
-    color: #ff0000;
-    font-weight: bold;
-}
-
-.correct-flag {
-    background-color: #00ff00 !important;
-    transition: background-color 0.5s;
-}
-
-.wrong-flag {
-    background-color: #ff6b6b !important;
-    transition: background-color 0.5s;
-}
-
-/* Number colors */
-.n1 { color: #3498db; }
-.n2 { color: #2ecc71; }
-.n3 { color: #e74c3c; }
-.n4 { color: #9b59b6; }
-.n5 { color: #f1c40f; }
-.n6 { color: #1abc9c; }
-.n7 { color: #e67e22; }
-.n8 { color: #95a5a6; }
-
-#game-over-screen {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-}
-
-#game-over-text {
-    color: #ff0000;
-    margin-bottom: 20px;
-}
-
-.win-message {
-    color: #00ff00 !important;
-    text-shadow: 0 0 10px #00ff00;
-    animation: winPulse 1.5s infinite;
-}
-
-@keyframes winPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
-#final-time {
-    margin: 20px 0;
+#restartButton {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 20px;
+    background-color: #333;
     color: #fff;
+    border: none;
+    cursor: pointer;
 }
 
-#result-message {
-    margin: 15px 0;
-    font-size: 0.8em;
-    color: #fff;
+#restartButton:hover {
+    background-color: #555;
 }
-
-@media (max-width: 600px) {
-    .grid {
-        grid-template-columns: repeat(10, 30px);
-    }
-    
-    .cell {
-        width: 30px;
-        height: 30px;
-        font-size: 0.8em;
-    }
-}
-/* Add to your existing CSS */
+/* Add these new styles to your existing CSS */
 .game-controls {
     position: fixed;
     top: 20px;
@@ -201,61 +86,82 @@ button:hover {
 }
 
 .return-button, .next-level-button {
-    font-family: 'Press Start 2P', cursive;
     padding: 10px 20px;
-    font-size: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.return-button {
+    background-color: #2196F3;
+    color: white;
+}
+
+.return-button:hover {
+    background-color: #1976D2;
+    transform: scale(1.05);
+}
+
+.next-level-button {
+    background-color: #4CAF50;
+    color: white;
+    display: none;
+}
+
+.next-level-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.win-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 30px 50px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+    z-index: 2000;
+}
+
+.win-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.win-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.return-button {
-    background: #2196F3;
+.win-buttons button:first-child {
+    background-color: #2196F3;
     color: white;
 }
 
-.return-button:hover {
-    background: #1976D2;
-    transform: scale(1.05);
-}
-
-.next-level-button {
-    background: #4CAF50;
+.win-buttons button:last-child {
+    background-color: #4CAF50;
     color: white;
-    display: none;
 }
 
-.next-level-button:hover {
-    background: #45a049;
+.win-buttons button:hover {
     transform: scale(1.05);
+    filter: brightness(1.1);
 }
 
-#level-complete {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    text-align: center;
-}
-
-.level-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.level-buttons button {
-    font-size: 12px;
-    padding: 10px 20px;
-}
-
-.level-buttons button:first-child {
-    background: #2196F3;
-}
-
-.level-buttons button:last-child {
-    background: #4CAF50;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -60%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
 }

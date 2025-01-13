@@ -1,87 +1,114 @@
 {% load static %}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hangman - Level 2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 2</title>
+    {% load static %}
     <link rel="stylesheet" href="{% static 'game/2/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-controls">
-        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
-        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+        <button class="return-button" onclick="returnToLevels()">
+            <i class="fas fa-home"></i> Return
+        </button>
+        <button class="next-level-button" onclick="goToNextLevel()">
+            <i class="fas fa-forward"></i> Next Level
+        </button>
     </div>
 
-    <h1>Hangman Game</h1>
+    <div id="game-container">
+        <div class="header">
+            <!-- <h1>Cryptic Word Challenge</h1> -->
+            <div class="level-indicator">Level 2</div>
+        </div>
 
-    <div class="game-container">
-        <!-- Word Display -->
-        <div class="word-display" id="wordDisplay"></div>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Attempts</div>
+                <div class="stat-value" id="attempts">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="timer">00:00</div>
+            </div>
+        </div>
 
-        <!-- Message Display -->
+        <div class="hint" id="hint"></div>
+        <div class="word-display" id="word-display"></div>
+
+        <div class="input-area">
+            <input type="text" id="guess-input" placeholder="Enter your guess..." maxlength="13">
+            <button onclick="checkGuess()">Guess</button>
+            <button onclick="showHint()" class="hint-button">Show Length</button>
+        </div>
+
         <div class="message" id="message"></div>
 
-        <!-- Hangman Drawing -->
-        <canvas id="hangmanCanvas" width="200" height="200"></canvas>
-
-        <!-- Alphabet Buttons -->
-        <div class="alphabet" id="alphabet"></div>
-
-        <!-- Restart Button -->
-        <button id="restartButton">Restart Game</button>
-    </div>
-
-    <div class="win-message" id="winMessage">
-        <h2>Congratulations! 🎉</h2>
-        <p>You've completed Level 2!</p>
-        <div class="win-buttons">
-            <button onclick="returnToLevels()">Return to Levels</button>
-            <button onclick="goToNextLevel()">Next Level</button>
+        <div class="win-message" id="winMessage">
+            <div class="success-animation">
+                <div class="checkmark-circle">
+                    <div class="checkmark"></div>
+                </div>
+            </div>
+            <h2>Challenge Complete! 🎉</h2>
+            <div class="performance-metrics">
+                <div class="metric">
+                    <span class="label">Accuracy:</span>
+                    <span class="value" id="accuracy-rating">98%</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Time Bonus:</span>
+                    <span class="value" id="time-bonus">+500</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Final Score:</span>
+                    <span class="value" id="final-score">2500</span>
+                </div>
+            </div>
+            <div class="win-buttons">
+                <button onclick="returnToLevels()">Return to Hub</button>
+                <button onclick="goToNextLevel()">Next Challenge</button>
+            </div>
         </div>
     </div>
+
     <script>
         const homeUrl = "{% url 'home' %}";
         const nextLevelUrl = "{% url 'game3' %}";
         const updateLevelUrl = "{% url 'update_level' %}";
-        
-      
-        
         const csrfToken = "{{ csrf_token }}";
-        // Pass the Django URL to a global variable
         
         function returnToLevels() {
             window.location.href = homeUrl;
-            
         }
+        
         function goToNextLevel() {
-          
-
             fetch(updateLevelUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken, // Use CSRF token
+                    'X-CSRFToken': csrfToken,
                 },
-                body: JSON.stringify({ level: 3 }), // Example: Pass the next level
+                body: JSON.stringify({ level: 3 }),
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log(`Level successfully updated to: ${data.level}`);
-                    window.location.href = nextLevelUrl; // Redirect to the next level
-                } else {
-                    console.error("Error from server:", data.error);
+                    window.location.href = nextLevelUrl;
                 }
             })
-            .catch(error => {
-                console.error("Fetch error:", error);
-            });
+            .catch(error => console.error('Error:', error));
         }
     </script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
     <script src="{% static 'game/2/script.js' %}"></script>
 </body>
 </html>

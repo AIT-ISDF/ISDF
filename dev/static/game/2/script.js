@@ -1,233 +1,229 @@
-// List of words to choose from
-const wordList = [
-    'javascript',
-    'hangman',
-    'programming',
-    'developer',
-    'computer',
-    'algorithm',
-    'function',
-    'variable',
-    'constant',
-    'array',
-    'object',
-    'string',
-    'number',
-    'boolean',
-    'undefined',
-    'null',
-    'class',
-    'scope',
-    'closure',
-    'promise'
-];
-
-// Game variables
-let chosenWord = '';
-let guessedLetters = [];
-let mistakes = 0;
-const maxMistakes = 6;
-let gameActive = true;
-
-// Select elements
-const wordDisplay = document.getElementById('wordDisplay');
-const messageDisplay = document.getElementById('message');
-const alphabetDiv = document.getElementById('alphabet');
-const restartButton = document.getElementById('restartButton');
-const canvas = document.getElementById('hangmanCanvas');
-const context = canvas.getContext('2d');
-const nextLevelButton = document.querySelector('.next-level-button');
-const winMessage = document.getElementById('winMessage');
-
-// Check level access when page loads
+// Check level progress
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if this level is unlocked
     const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
     if (2 > currentProgress) {
         window.location.href = '../index.html';
         return;
     }
-    
-    // Start the game
-    initGame();
+    initializeGame();
 });
 
-// Initialize game
-function initGame() {
-    // Reset variables
-    mistakes = 0;
-    guessedLetters = [];
-    messageDisplay.textContent = '';
-    gameActive = true;
-    
-    // Clear the canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Hide win message and next level button
-    winMessage.style.display = 'none';
-    nextLevelButton.style.display = 'none';
-
-    // Draw the base line for hangman
-    context.beginPath();
-    context.moveTo(20, 180);
-    context.lineTo(180, 180);
-    context.strokeStyle = '#333';
-    context.lineWidth = 2;
-    context.stroke();
-
-    // Randomly select a word
-    chosenWord = wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
-
-    // Display word with underscores
-    displayWord();
-
-    // Create alphabet buttons
-    createAlphabetButtons();
-
-    // Enable all alphabet buttons
-    const buttons = alphabetDiv.getElementsByTagName('button');
-    for (let button of buttons) {
-        button.disabled = false;
-    }
-
-    // Reset message display
-    messageDisplay.style.color = '#333';
-}
-
-// Display the word with guessed letters and underscores
-function displayWord() {
-    const display = chosenWord
-        .split('')
-        .map(letter => (guessedLetters.includes(letter) ? letter : '_'))
-        .join(' ');
-
-    wordDisplay.textContent = display;
-
-    // Check for win condition
-    if (gameActive && !display.includes('_')) {
-        gameActive = false;
-        messageDisplay.textContent = 'You won! 🎉';
-        messageDisplay.style.color = '#4CAF50';
-        disableAlphabet();
-        completeLevel(2);
-        winMessage.style.display = 'block';
-        nextLevelButton.style.display = 'block';
-    }
-}
-
-// Create alphabet buttons
-function createAlphabetButtons() {
-    alphabetDiv.innerHTML = '';
-    for (let i = 65; i <= 90; i++) {
-        const letter = String.fromCharCode(i);
-        const button = document.createElement('button');
-        button.textContent = letter;
-        button.addEventListener('click', handleGuess);
-        alphabetDiv.appendChild(button);
-    }
-}
-
-// Handle user's guess
-function handleGuess(event) {
-    if (!gameActive) return;
-
-    const letter = event.target.textContent;
-    event.target.disabled = true;
-
-    if (chosenWord.includes(letter)) {
-        guessedLetters.push(letter);
-        displayWord();
-    } else {
-        mistakes++;
-        updateHangman();
-        if (mistakes === maxMistakes) {
-            gameActive = false;
-            messageDisplay.textContent = `You lost! The word was: ${chosenWord}`;
-            messageDisplay.style.color = '#ff3333';
-            displayWord();
-            disableAlphabet();
+// Game Configuration
+const GAME_CONFIG = {
+    words: [
+        {
+            word: "OBFUSCATION",
+            hint: "The act of making something unclear or difficult to understand",
+            display: "O_F__C_T__N"
+        },
+        {
+            word: "NONCE",
+            hint: "A number used only once in cryptographic communication",
+            display: "N_N_E"
+        },
+        {
+            word: "STEGANOGRAPHY",
+            hint: "The practice of concealing messages within other data",
+            display: "ST_G_N_GR__HY"
         }
+    ],
+    timeLimit: 300, // 5 minutes
+    pointsPerWord: 100,
+    timeBonus: 10, // points per second remaining
+    maxAttempts: 5 // per word
+};
+
+// Game State
+let gameState = {
+    currentWordIndex: 0,
+    attempts: 0,
+    score: 0,
+    timeRemaining: GAME_CONFIG.timeLimit,
+    timer: null,
+    gameRunning: false,
+    hintsUsed: 0
+};
+
+function initializeGame() {
+    setupEventListeners();
+    resetGameState();
+}
+
+function setupEventListeners() {
+    // Input field enter key handler
+    document.getElementById('guess-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkGuess();
+        }
+    });
+
+    // Input field focus handler
+    document.getElementById('guess-input').addEventListener('focus', function() {
+        this.classList.remove('error');
+    });
+}
+
+function resetGameState() {
+    gameState = {
+        currentWordIndex: 0,
+        attempts: 0,
+        score: 0,
+        timeRemaining: GAME_CONFIG.timeLimit,
+        timer: null,
+        gameRunning: true,
+        hintsUsed: 0
+    };
+
+    loadCurrentWord();
+    startTimer();
+    updateDisplay();
+}
+
+function loadCurrentWord() {
+    const currentWord = GAME_CONFIG.words[gameState.currentWordIndex];
+    document.getElementById('word-display').textContent = currentWord.display;
+    document.getElementById('hint').textContent = currentWord.hint;
+    document.getElementById('guess-input').value = '';
+    document.getElementById('guess-input').maxLength = currentWord.word.length;
+}
+
+function startTimer() {
+    clearInterval(gameState.timer);
+    gameState.timer = setInterval(() => {
+        if (gameState.timeRemaining > 0) {
+            gameState.timeRemaining--;
+            updateTimerDisplay();
+            
+            if (gameState.timeRemaining === 0) {
+                gameOver(false);
+            }
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(gameState.timeRemaining / 60);
+    const seconds = gameState.timeRemaining % 60;
+    document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function checkGuess() {
+    if (!gameState.gameRunning) return;
+
+    const input = document.getElementById('guess-input').value.toUpperCase();
+    const currentWord = GAME_CONFIG.words[gameState.currentWordIndex].word;
+    const message = document.getElementById('message');
+    const inputField = document.getElementById('guess-input');
+
+    // Check word length
+    if (input.length !== currentWord.length) {
+        message.textContent = `The word should be ${currentWord.length} letters long!`;
+        message.className = 'message error';
+        inputField.classList.add('error');
+        return;
+    }
+
+    gameState.attempts++;
+    updateDisplay();
+
+    if (input === currentWord) {
+        handleCorrectGuess();
+    } else {
+        handleIncorrectGuess();
     }
 }
 
-// Disable all alphabet buttons
-function disableAlphabet() {
-    const buttons = alphabetDiv.getElementsByTagName('button');
-    for (let button of buttons) {
-        button.disabled = true;
+function handleCorrectGuess() {
+    const message = document.getElementById('message');
+    message.textContent = "Correct! Well done!";
+    message.className = 'message success';
+
+    // Calculate points
+    const attemptBonus = Math.max(0, GAME_CONFIG.pointsPerWord - (gameState.attempts * 10));
+    gameState.score += GAME_CONFIG.pointsPerWord + attemptBonus;
+
+    gameState.currentWordIndex++;
+    gameState.attempts = 0;
+
+    if (gameState.currentWordIndex < GAME_CONFIG.words.length) {
+        setTimeout(() => {
+            loadCurrentWord();
+            message.className = 'message';
+        }, 1500);
+    } else {
+        gameOver(true);
+    }
+
+    updateDisplay();
+}
+
+function handleIncorrectGuess() {
+    const message = document.getElementById('message');
+    message.textContent = "Incorrect. Try again!";
+    message.className = 'message error';
+
+    if (gameState.attempts >= GAME_CONFIG.maxAttempts) {
+        gameOver(false);
     }
 }
 
-// Update the hangman drawing based on mistakes
-function updateHangman() {
-    context.lineWidth = 2;
-    context.strokeStyle = '#333';
+function showHint() {
+    if (!gameState.gameRunning) return;
 
-    switch (mistakes) {
-        case 1:
-            // Draw the gallows (vertical pole)
-            context.beginPath();
-            context.moveTo(20, 180);
-            context.lineTo(20, 20);
-            context.stroke();
-            break;
-        case 2:
-            // Draw the horizontal beam
-            context.beginPath();
-            context.moveTo(20, 20);
-            context.lineTo(100, 20);
-            context.stroke();
-            break;
-        case 3:
-            // Draw the rope
-            context.beginPath();
-            context.moveTo(100, 20);
-            context.lineTo(100, 40);
-            context.stroke();
-            break;
-        case 4:
-            // Draw the head
-            context.beginPath();
-            context.arc(100, 50, 10, 0, Math.PI * 2);
-            context.stroke();
-            break;
-        case 5:
-            // Draw the body
-            context.beginPath();
-            context.moveTo(100, 60);
-            context.lineTo(100, 100);
-            context.stroke();
-            break;
-        case 6:
-            // Draw the arms and legs
-            // Left arm
-            context.beginPath();
-            context.moveTo(100, 70);
-            context.lineTo(80, 90);
-            context.stroke();
+    const currentWord = GAME_CONFIG.words[gameState.currentWordIndex].word;
+    const message = document.getElementById('message');
+    
+    gameState.hintsUsed++;
+    message.textContent = `Word Length: ${currentWord.length} letters`;
+    message.className = 'message';
+}
 
-            // Right arm
-            context.beginPath();
-            context.moveTo(100, 70);
-            context.lineTo(120, 90);
-            context.stroke();
+function gameOver(isWin) {
+    gameState.gameRunning = false;
+    clearInterval(gameState.timer);
 
-            // Left leg
-            context.beginPath();
-            context.moveTo(100, 100);
-            context.lineTo(80, 130);
-            context.stroke();
-
-            // Right leg
-            context.beginPath();
-            context.moveTo(100, 100);
-            context.lineTo(120, 130);
-            context.stroke();
-            break;
+    if (isWin) {
+        showWinScreen();
+    } else {
+        showGameOverScreen();
     }
 }
 
-// Level completion and navigation functions
+function showWinScreen() {
+    const timeBonus = gameState.timeRemaining * GAME_CONFIG.timeBonus;
+    const finalScore = gameState.score + timeBonus;
+    const accuracy = calculateAccuracy();
+
+    document.getElementById('accuracy-rating').textContent = `${accuracy}%`;
+    document.getElementById('time-bonus').textContent = `+${timeBonus}`;
+    document.getElementById('final-score').textContent = finalScore;
+
+    document.getElementById('winMessage').style.display = 'block';
+    document.querySelector('.next-level-button').style.display = 'block';
+
+    completeLevel(2);
+}
+
+function showGameOverScreen() {
+    const message = document.getElementById('message');
+    message.textContent = "Game Over! Too many attempts or time's up!";
+    message.className = 'message error';
+    
+    document.getElementById('guess-input').disabled = true;
+}
+
+function calculateAccuracy() {
+    const totalAttempts = gameState.attempts + (gameState.currentWordIndex * GAME_CONFIG.maxAttempts);
+    const minPossibleAttempts = GAME_CONFIG.words.length;
+    return Math.round((minPossibleAttempts / Math.max(totalAttempts, 1)) * 100);
+}
+
+function updateDisplay() {
+    document.getElementById('attempts').textContent = gameState.attempts;
+    document.getElementById('score').textContent = gameState.score;
+}
+
 function completeLevel(levelNumber) {
     const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
     if (levelNumber === currentProgress) {
@@ -235,6 +231,5 @@ function completeLevel(levelNumber) {
     }
 }
 
-
-// Event listeners
-restartButton.addEventListener('click', initGame);
+// Initialize game when document is loaded
+document.addEventListener('DOMContentLoaded', initializeGame);

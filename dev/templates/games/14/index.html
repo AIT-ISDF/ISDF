@@ -5,10 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knights & Queens - Level 14</title>
+    <title>Level 14</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'game/14/style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-controls">
@@ -23,137 +23,120 @@
     <div id="game-container">
         <!-- Start Screen -->
         <div id="start-screen">
-            <h1>Knights & Queens</h1>
-            <div class="game-description">
-                <h3>Royal Challenge:</h3>
-                <ul>
-                    <li>Place knights and queens strategically</li>
-                    <li>Avoid placing pieces in each other's attack range</li>
-                    <li>Control more territory than the AI opponent</li>
-                    <li>Complete the challenge within the time limit</li>
-                </ul>
+            <h1>Tree Balancer</h1>
+            <div class="rules-container">
+                <h3>Mission Objectives:</h3>
+                <div class="rules-content">
+                    <h4>Rules:</h4>
+                    <ul>
+                        <li>Each node contains a weight value (10-99)</li>
+                        <li>A subtree is balanced when the difference between left and right total weights is ≤ 1</li>
+                        <li>Total weight includes the node's value plus all children's weights</li>
+                        <li>Swap node values to balance the entire tree</li>
+                    </ul>
+                    
+                    <h4>How to Play:</h4>
+                    <ol>
+                        <li>Click on any two nodes to swap their values</li>
+                        <li>Red pulsing nodes indicate unbalanced subtrees</li>
+                        <li>Green nodes show your current selection</li>
+                        <li>Balance factor shows overall tree balance percentage</li>
+                    </ol>
+
+                    <h4>Victory Conditions:</h4>
+                    <ul>
+                        <li>All subtrees must be balanced (100% balance factor)</li>
+                        <li>Complete within the time limit</li>
+                        <li>Use minimum possible moves</li>
+                    </ul>
+                </div>
             </div>
             <div class="difficulty-selector">
                 <h3>Select Difficulty</h3>
                 <div class="difficulty-buttons">
-                    <button data-difficulty="easy" class="selected">Squire</button>
-                    <button data-difficulty="medium">Knight</button>
-                    <button data-difficulty="hard">Royal Guard</button>
+                    <button data-difficulty="easy" class="selected">Novice</button>
+                    <button data-difficulty="medium">Advanced</button>
+                    <button data-difficulty="hard">Expert</button>
                 </div>
             </div>
-            <button id="start-button">Begin Battle</button>
+            <button id="start-button">Begin Challenge</button>
         </div>
 
         <!-- Game Board -->
         <div id="game-board" class="hidden">
             <div class="game-info">
-                <div class="player-stats">
-                    <div class="player-pieces">
-                        <div class="piece-count knight">
-                            <img src="{% static 'game/14/images/knight.png' %}" alt="Knight">
-                            <span>×3</span>
-                        </div>
-                        <div class="piece-count queen">
-                            <img src="{% static 'game/14/images/queen.png' %}" alt="Queen">
-                            <span>×2</span>
-                        </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Moves</div>
+                        <div class="stat-value" id="moves">0</div>
                     </div>
-                    <div class="territory-control">
-                        <div class="control-bar">
-                            <div class="player-control"></div>
-                            <div class="ai-control"></div>
-                        </div>
-                        <span class="control-percentage">50%</span>
+                    <div class="stat-box">
+                        <div class="stat-label">Balance Factor</div>
+                        <div class="stat-value" id="balance">0%</div>
                     </div>
-                </div>
-                <div class="game-timer">
-                    <div class="timer-ring">
-                        <svg>
-                            <circle class="timer-circle" cx="30" cy="30" r="28"></circle>
-                        </svg>
-                        <span class="timer-value">3:00</span>
+                    <div class="stat-box">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="time">3:00</div>
                     </div>
                 </div>
             </div>
 
-            <div class="chess-board">
-                <!-- Board will be generated via JavaScript -->
-            </div>
+            <div class="tree-container" id="tree-container"></div>
 
-            <div class="piece-selector">
-                <div class="piece knight" draggable="true">
-                    <img src="{% static 'game/14/images/knight.png' %}" alt="Knight">
-                </div>
-                <div class="piece queen" draggable="true">
-                    <img src="{% static 'game/14/images/queen.png' %}" alt="Queen">
-                </div>
-            </div>
-
-            <div class="move-history">
-                <h3>Battle Log</h3>
-                <div class="history-list">
-                    <!-- Move history will be added here -->
-                </div>
+            <div class="hint-panel">
+                <button id="hint-button" onclick="showHint()">Get Hint (3 remaining)</button>
+                <div class="hint-text"></div>
             </div>
         </div>
 
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="hidden">
             <div class="result-container">
-                <h2>Battle Concluded</h2>
-                <div class="final-stats">
-                    <div class="stat">
-                        <span class="label">Territory Control</span>
-                        <span class="value" id="final-territory">65%</span>
-                    </div>
-                    <div class="stat">
-                        <span class="label">Pieces Placed</span>
-                        <span class="value" id="pieces-placed">5/5</span>
-                    </div>
-                    <div class="stat">
-                        <span class="label">Time Remaining</span>
-                        <span class="value" id="time-remaining">1:45</span>
-                    </div>
+                <h2>Challenge Failed</h2>
+                <div class="stats">
+                    <p>Moves Made: <span id="final-moves">0</span></p>
+                    <p>Final Balance: <span id="final-balance">0%</span></p>
+                    <p>Time Elapsed: <span id="time-elapsed">00:00</span></p>
                 </div>
-                <button id="restart-button">Fight Again</button>
+                <button id="restart-button">Try Again</button>
             </div>
         </div>
 
         <!-- Win Message -->
         <div class="win-message" id="winMessage">
-            <div class="victory-banner">
-                <div class="crown-animation">
-                    <img src="{% static 'game/14/images/crown.png' %}" alt="Crown">
+            <div class="success-animation">
+                <div class="checkmark-circle">
+                    <div class="checkmark"></div>
                 </div>
-                <h2>Victory Achieved! 👑</h2>
             </div>
-            <div class="victory-stats">
-                <div class="stat">
-                    <span class="label">Strategic Rating</span>
-                    <span class="value" id="strategy-rating">Masterful</span>
+            <h2>Perfect Balance Achieved! 🎉</h2>
+            <div class="performance-metrics">
+                <div class="metric">
+                    <span class="label">Efficiency Rating:</span>
+                    <span class="value" id="efficiency-rating">98%</span>
                 </div>
-                <div class="stat">
-                    <span class="label">Territory Dominated</span>
-                    <span class="value" id="territory-percentage">75%</span>
+                <div class="metric">
+                    <span class="label">Moves Used:</span>
+                    <span class="value" id="moves-used">12</span>
                 </div>
-                <div class="stat">
-                    <span class="label">Battle Duration</span>
-                    <span class="value" id="battle-time">2:15</span>
+                <div class="metric">
+                    <span class="label">Time Bonus:</span>
+                    <span class="value" id="time-bonus">+500</span>
                 </div>
             </div>
             <div class="win-buttons">
-                <button onclick="returnToLevels()">Return to Command</button>
+                <button onclick="returnToLevels()">Return to Hub</button>
                 <button onclick="goToNextLevel()">Next Challenge</button>
             </div>
         </div>
     </div>
 
-    <!-- Move Validation Modal -->
-    <div id="validation-modal" class="modal hidden">
+    <!-- Hint Modal -->
+    <div id="hint-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>Invalid Move</h3>
-            <p>This position is under attack!</p>
-            <button onclick="closeModal()">Understood</button>
+            <h3>Hint</h3>
+            <p id="hint-message"></p>
+            <button onclick="closeModal('hint-modal')">Got it!</button>
         </div>
     </div>
 

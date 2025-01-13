@@ -10,44 +10,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Game Configuration
 const GAME_CONFIG = {
-    boardSize: 8,
-    timeLimit: 180, // 3 minutes
-    pieces: {
-        player: {
-            knights: 3,
-            queens: 2
-        },
-        ai: {
-            knights: 3,
-            queens: 2
-        }
-    },
     difficulties: {
-        easy: { depth: 2, timePerMove: 1000 },
-        medium: { depth: 3, timePerMove: 800 },
-        hard: { depth: 4, timePerMove: 600 }
+        easy: {
+            depth: 3,
+            timeLimit: 240,
+            maxMoves: 20
+        },
+        medium: {
+            depth: 4,
+            timeLimit: 180,
+            maxMoves: 15
+        },
+        hard: {
+            depth: 5,
+            timeLimit: 120,
+            maxMoves: 12
+        }
     }
 };
 
 // Game State
 let gameState = {
-    board: Array(8).fill(null).map(() => Array(8).fill(null)),
-    selectedPiece: null,
-    playerTurn: true,
+    root: null,
+    selectedNode: null,
+    moves: 0,
+    nodes: [],
+    edges: [],
+    hintsRemaining: 3,
+    timeRemaining: 180,
     difficulty: 'medium',
-    remainingTime: GAME_CONFIG.timeLimit,
-    playerPieces: { ...GAME_CONFIG.pieces.player },
-    aiPieces: { ...GAME_CONFIG.pieces.ai },
-    moveHistory: [],
     timer: null,
     gameRunning: false
 };
 
+class TreeNode {
+    constructor(value, x, y, level) {
+        this.value = value;
+        this.x = x;
+        this.y = y;
+        this.level = level;
+        this.left = null;
+        this.right = null;
+        this.weight = value;
+    }
+
+    updateWeight() {
+        this.weight = this.value;
+        if (this.left) this.weight += this.left.weight;
+        if (this.right) this.weight += this.right.weight;
+        return this.weight;
+    }
+}
+
 // Initialize Game
 function initializeGame() {
     setupEventListeners();
-    createBoard();
-    updatePieceCount();
+    setupDifficultySelection();
 }
 
 function setupEventListeners() {
@@ -65,273 +83,252 @@ function setupEventListeners() {
     });
 }
 
-function createBoard() {
-    const board = document.querySelector('.chess-board');
-    board.innerHTML = '';
-
-    for (let row = 0; row < GAME_CONFIG.boardSize; row++) {
-        for (let col = 0; col < GAME_CONFIG.boardSize; col++) {
-            const square = document.createElement('div');
-            square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
-            square.dataset.row = row;
-            square.dataset.col = col;
-            square.addEventListener('click', () => handleSquareClick(row, col));
-            square.addEventListener('dragover', handleDragOver);
-            square.addEventListener('drop', (e) => handleDrop(e, row, col));
-            board.appendChild(square);
-        }
-    }
-}
-
 function startGame() {
-    gameState.gameRunning = true;
+    const config = GAME_CONFIG.difficulties[gameState.difficulty];
+    gameState = {
+        ...gameState,
+        timeRemaining: config.timeLimit,
+        moves: 0,
+        hintsRemaining: 3,
+        gameRunning: true
+    };
+
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('game-board').classList.remove('hidden');
+    
+    createRandomTree(config.depth);
     startTimer();
+    updateDisplay();
+}
+
+function createRandomTree(depth) {
+    const values = generateUniqueValues(Math.pow(2, depth) - 1);
+    const containerWidth = document.querySelector('.tree-container').offsetWidth;
+    const containerHeight = document.querySelector('.tree-container').offsetHeight;
+    
+    gameState.nodes = [];
+    gameState.edges = [];
+    gameState.root = buildTree(values, 0, containerWidth/2, 50, 0, depth);
+    updateTreeWeights(gameState.root);
+}
+
+function generateUniqueValues(count) {
+    const values = [];
+    while (values.length < count) {
+        const value = Math.floor(Math.random() * 90) + 10; // 10-99
+        if (!values.includes(value)) values.push(value);
+    }
+    return values;
+}
+
+function buildTree(values, index, x, y, level, maxDepth) {
+    if (index >= values.length || level >= maxDepth) return null;
+    
+    const node = new TreeNode(values[index], x, y, level);
+    gameState.nodes.push(node);
+
+    const horizontalSpacing = 300 / (Math.pow(2, level));
+    const verticalSpacing = 80;
+
+    node.left = buildTree(values, 2*index + 1, 
+        x - horizontalSpacing, y + verticalSpacing, level + 1, maxDepth);
+    node.right = buildTree(values, 2*index + 2, 
+        x + horizontalSpacing, y + verticalSpacing, level + 1, maxDepth);
+
+    if (node.left) gameState.edges.push({from: node, to: node.left});
+    if (node.right) gameState.edges.push({from: node, to: node.right});
+
+    return node;
+}
+
+function updateTreeWeights(node) {
+    if (!node) return 0;
+    node.weight = node.value + 
+        updateTreeWeights(node.left) + 
+        updateTreeWeights(node.right);
+    return node.weight;
+}
+
+function renderTree() {
+    const container = document.getElementById('tree-container');
+    container.innerHTML = '';
+
+    // Render edges
+    gameState.edges.forEach(edge => {
+        const edgeElement = document.createElement('div');
+        edgeElement.className = 'edge';
+        
+        const length = Math.sqrt(
+            Math.pow(edge.to.x - edge.from.x, 2) + 
+            Math.pow(edge.to.y - edge.from.y, 2)
+        );
+        const angle = Math.atan2(
+            edge.to.y - edge.from.y, 
+            edge.to.x - edge.from.x
+        ) * 180 / Math.PI;
+
+        edgeElement.style.width = `${length}px`;
+        edgeElement.style.left = `${edge.from.x}px`;
+        edgeElement.style.top = `${edge.from.y + 30}px`;
+        edgeElement.style.transform = `rotate(${angle}deg)`;
+
+        container.appendChild(edgeElement);
+    });
+
+    // Render nodes
+    gameState.nodes.forEach(node => {
+        const nodeElement = document.createElement('div');
+        nodeElement.className = 'node';
+        nodeElement.textContent = node.value;
+        nodeElement.style.left = `${node.x - 30}px`;
+        nodeElement.style.top = `${node.y - 30}px`;
+        
+        if (!isBalanced(node)) {
+            nodeElement.classList.add('unbalanced');
+        }
+        if (gameState.selectedNode === node) {
+            nodeElement.classList.add('selected');
+        }
+        
+        nodeElement.onclick = () => handleNodeClick(node);
+        container.appendChild(nodeElement);
+    });
+}
+
+function handleNodeClick(node) {
+    if (!gameState.gameRunning) return;
+
+    if (!gameState.selectedNode) {
+        gameState.selectedNode = node;
+    } else {
+        if (gameState.selectedNode !== node) {
+            swapNodes(gameState.selectedNode, node);
+            gameState.moves++;
+            updateDisplay();
+            checkWinCondition();
+        }
+        gameState.selectedNode = null;
+    }
+    renderTree();
+}
+
+function swapNodes(node1, node2) {
+    const tempValue = node1.value;
+    node1.value = node2.value;
+    node2.value = tempValue;
+    updateTreeWeights(gameState.root);
+}
+
+function isBalanced(node) {
+    if (!node) return true;
+    
+    const leftWeight = node.left ? node.left.weight : 0;
+    const rightWeight = node.right ? node.right.weight : 0;
+    
+    return Math.abs(leftWeight - rightWeight) <= 1;
+}
+
+function updateDisplay() {
+    document.getElementById('moves').textContent = gameState.moves;
+    document.getElementById('balance').textContent = 
+        `${Math.round(calculateBalanceFactor() * 100)}%`;
+    document.getElementById('hint-button').textContent = 
+        `Get Hint (${gameState.hintsRemaining} remaining)`;
+}
+
+function calculateBalanceFactor() {
+    let balanced = 0;
+    let total = 0;
+    
+    function checkNode(node) {
+        if (!node) return;
+        if (isBalanced(node)) balanced++;
+        total++;
+        checkNode(node.left);
+        checkNode(node.right);
+    }
+    
+    checkNode(gameState.root);
+    return balanced / total;
 }
 
 function startTimer() {
-    const timerCircle = document.querySelector('.timer-circle');
-    const circumference = 2 * Math.PI * 28; // r=28 from SVG
-    timerCircle.style.strokeDasharray = circumference;
-    
+    clearInterval(gameState.timer);
     gameState.timer = setInterval(() => {
-        gameState.remainingTime--;
+        gameState.timeRemaining--;
         updateTimerDisplay();
         
-        if (gameState.remainingTime <= 0) {
+        if (gameState.timeRemaining <= 0) {
             gameOver(false);
         }
     }, 1000);
 }
 
-// Piece Movement Logic
-function isValidMove(piece, startRow, startCol, endRow, endCol) {
-    if (piece === 'knight') {
-        const rowDiff = Math.abs(endRow - startRow);
-        const colDiff = Math.abs(endCol - startCol);
-        return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
-    } else if (piece === 'queen') {
-        const rowDiff = Math.abs(endRow - startRow);
-        const colDiff = Math.abs(endCol - startCol);
-        return rowDiff === colDiff || rowDiff === 0 || colDiff === 0;
-    }
-    return false;
-}
-
-function getAttackedSquares(piece, row, col) {
-    const attacked = new Set();
-    
-    if (piece === 'knight') {
-        const moves = [
-            [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-            [1, -2], [1, 2], [2, -1], [2, 1]
-        ];
-        moves.forEach(([dRow, dCol]) => {
-            const newRow = row + dRow;
-            const newCol = col + dCol;
-            if (isOnBoard(newRow, newCol)) {
-                attacked.add(`${newRow},${newCol}`);
-            }
-        });
-    } else if (piece === 'queen') {
-        // Horizontal, vertical, and diagonal moves
-        const directions = [
-            [-1, -1], [-1, 0], [-1, 1],
-            [0, -1],          [0, 1],
-            [1, -1],  [1, 0],  [1, 1]
-        ];
-        directions.forEach(([dRow, dCol]) => {
-            let newRow = row + dRow;
-            let newCol = col + dCol;
-            while (isOnBoard(newRow, newCol)) {
-                attacked.add(`${newRow},${newCol}`);
-                newRow += dRow;
-                newCol += dCol;
-            }
-        });
-    }
-    return attacked;
-}
-
-function isOnBoard(row, col) {
-    return row >= 0 && row < GAME_CONFIG.boardSize && 
-           col >= 0 && col < GAME_CONFIG.boardSize;
-}
-
-function handleSquareClick(row, col) {
-    if (!gameState.gameRunning || !gameState.playerTurn) return;
-
-    if (gameState.selectedPiece) {
-        tryPlacePiece(row, col);
-    } else {
-        selectPiece(row, col);
-    }
-}
-
-function tryPlacePiece(row, col) {
-    if (!isValidPlacement(row, col)) {
-        showValidationModal("Invalid placement! Square is under attack.");
-        return;
-    }
-
-    placePiece(gameState.selectedPiece, row, col, 'player');
-    gameState.selectedPiece = null;
-    clearHighlights();
-    updatePieceCount();
-    
-    if (checkWinCondition()) {
-        gameOver(true);
-    } else {
-        gameState.playerTurn = false;
-        setTimeout(makeAIMove, GAME_CONFIG.difficulties[gameState.difficulty].timePerMove);
-    }
-}
-
-function makeAIMove() {
-    const move = calculateBestMove(
-        gameState.board,
-        GAME_CONFIG.difficulties[gameState.difficulty].depth
-    );
-    
-    if (move) {
-        placePiece(move.piece, move.row, move.col, 'ai');
-        updatePieceCount();
-        
-        if (checkWinCondition()) {
-            gameOver(false);
-        } else {
-            gameState.playerTurn = true;
-        }
-    }
-}
-
-function calculateBestMove(board, depth) {
-    // Minimax algorithm implementation
-    let bestScore = -Infinity;
-    let bestMove = null;
-    
-    for (let row = 0; row < GAME_CONFIG.boardSize; row++) {
-        for (let col = 0; col < GAME_CONFIG.boardSize; col++) {
-            if (isValidPlacement(row, col)) {
-                // Try placing each available piece
-                ['knight', 'queen'].forEach(piece => {
-                    if (gameState.aiPieces[piece + 's'] > 0) {
-                        board[row][col] = { piece, owner: 'ai' };
-                        const score = minimax(board, depth - 1, false);
-                        board[row][col] = null;
-                        
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMove = { piece, row, col };
-                        }
-                    }
-                });
-            }
-        }
-    }
-    
-    return bestMove;
-}
-
-function minimax(board, depth, isMaximizing) {
-    if (depth === 0 || checkWinCondition()) {
-        return evaluatePosition(board);
-    }
-    
-    if (isMaximizing) {
-        let maxScore = -Infinity;
-        forEachValidMove(board, 'ai', (row, col, piece) => {
-            board[row][col] = { piece, owner: 'ai' };
-            maxScore = Math.max(maxScore, minimax(board, depth - 1, false));
-            board[row][col] = null;
-        });
-        return maxScore;
-    } else {
-        let minScore = Infinity;
-        forEachValidMove(board, 'player', (row, col, piece) => {
-            board[row][col] = { piece, owner: 'player' };
-            minScore = Math.min(minScore, minimax(board, depth - 1, true));
-            board[row][col] = null;
-        });
-        return minScore;
-    }
-}
-
-function evaluatePosition(board) {
-    let score = 0;
-    const playerTerritory = calculateTerritory('player');
-    const aiTerritory = calculateTerritory('ai');
-    
-    score += (aiTerritory - playerTerritory) * 10;
-    score += countPieces('ai') * 5;
-    score -= countPieces('player') * 5;
-    
-    return score;
-}
-
-function calculateTerritory(player) {
-    const attacked = new Set();
-    
-    for (let row = 0; row < GAME_CONFIG.boardSize; row++) {
-        for (let col = 0; col < GAME_CONFIG.boardSize; col++) {
-            const piece = gameState.board[row][col];
-            if (piece && piece.owner === player) {
-                const squares = getAttackedSquares(piece.piece, row, col);
-                squares.forEach(square => attacked.add(square));
-            }
-        }
-    }
-    
-    return attacked.size;
-}
-
 function updateTimerDisplay() {
-    const minutes = Math.floor(gameState.remainingTime / 60);
-    const seconds = gameState.remainingTime % 60;
-    document.querySelector('.timer-value').textContent = 
+    const minutes = Math.floor(gameState.timeRemaining / 60);
+    const seconds = gameState.timeRemaining % 60;
+    document.getElementById('time').textContent = 
         `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    
-    const timerCircle = document.querySelector('.timer-circle');
-    const circumference = 2 * Math.PI * 28;
-    const offset = circumference * (1 - gameState.remainingTime / GAME_CONFIG.timeLimit);
-    timerCircle.style.strokeDashoffset = offset;
 }
 
-function updatePieceCount() {
-    document.querySelector('.knight span').textContent = 
-        `×${gameState.playerPieces.knights}`;
-    document.querySelector('.queen span').textContent = 
-        `×${gameState.playerPieces.queens}`;
+function showHint() {
+    if (gameState.hintsRemaining <= 0) return;
     
-    updateTerritoryControl();
+    const unbalancedNodes = findUnbalancedNodes();
+    if (unbalancedNodes.length > 0) {
+        const node = unbalancedNodes[0];
+        const suggestion = findBalancingSuggestion(node);
+        
+        document.getElementById('hint-message').textContent = suggestion;
+        document.getElementById('hint-modal').classList.remove('hidden');
+        gameState.hintsRemaining--;
+        updateDisplay();
+    }
 }
 
-function updateTerritoryControl() {
-    const playerTerritory = calculateTerritory('player');
-    const aiTerritory = calculateTerritory('ai');
-    const total = GAME_CONFIG.boardSize * GAME_CONFIG.boardSize;
-    
-    const playerPercentage = (playerTerritory / total) * 100;
-    const aiPercentage = (aiTerritory / total) * 100;
-    
-    document.querySelector('.player-control').style.width = `${playerPercentage}%`;
-    document.querySelector('.ai-control').style.width = `${aiPercentage}%`;
-    document.querySelector('.control-percentage').textContent = 
-        `${Math.round(playerPercentage)}%`;
+function findUnbalancedNodes() {
+    return gameState.nodes.filter(node => !isBalanced(node));
 }
 
-function gameOver(playerWon) {
+function findBalancingSuggestion(node) {
+    const leftWeight = node.left ? node.left.weight : 0;
+    const rightWeight = node.right ? node.right.weight : 0;
+    const diff = Math.abs(leftWeight - rightWeight);
+    
+    return `Try balancing the node with value ${node.value}. ` +
+           `Current weight difference: ${diff}`;
+}
+
+function checkWinCondition() {
+    if (calculateBalanceFactor() === 1) {
+        gameOver(true);
+    }
+}
+
+function gameOver(isWin) {
     clearInterval(gameState.timer);
     gameState.gameRunning = false;
     
-    if (playerWon) {
+    if (isWin) {
+        const config = GAME_CONFIG.difficulties[gameState.difficulty];
+        const timeBonus = gameState.timeRemaining * 10;
+        const moveEfficiency = Math.max(0, 1 - (gameState.moves / config.maxMoves));
+        const efficiencyRating = Math.round(moveEfficiency * 100);
+        
+        document.getElementById('efficiency-rating').textContent = `${efficiencyRating}%`;
+        document.getElementById('moves-used').textContent = gameState.moves;
+        document.getElementById('time-bonus').textContent = `+${timeBonus}`;
+        
         document.getElementById('winMessage').style.display = 'block';
         document.querySelector('.next-level-button').style.display = 'block';
+        
         completeLevel(14);
     } else {
         document.getElementById('game-board').classList.add('hidden');
         document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('final-moves').textContent = gameState.moves;
+        document.getElementById('final-balance').textContent = 
+            `${Math.round(calculateBalanceFactor() * 100)}%`;
     }
 }
 
@@ -342,22 +339,11 @@ function completeLevel(levelNumber) {
     }
 }
 
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
 function restartGame() {
-    gameState = {
-        board: Array(8).fill(null).map(() => Array(8).fill(null)),
-        selectedPiece: null,
-        playerTurn: true,
-        difficulty: gameState.difficulty,
-        remainingTime: GAME_CONFIG.timeLimit,
-        playerPieces: { ...GAME_CONFIG.pieces.player },
-        aiPieces: { ...GAME_CONFIG.pieces.ai },
-        moveHistory: [],
-        timer: null,
-        gameRunning: false
-    };
-    
-    clearHighlights();
-    updatePieceCount();
     startGame();
 }
 

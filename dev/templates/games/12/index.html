@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <!DOCTYPE html>
@@ -6,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Circuit Logic - Level 12</title>
+    <title>Level 12</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'game/12/style.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -22,65 +21,60 @@
     </div>
 
     <div id="game-container">
-        <div class="power-indicator">
-            <div class="power-light"></div>
-            <span>System Power</span>
-        </div>
-
         <!-- Start Screen -->
         <div id="start-screen">
-            <h1>Advanced Circuit Logic</h1>
-            <div class="objective-container">
+            <h1>Pathfinder Challenge</h1>
+            <div class="mission-brief">
                 <h3>Mission Objectives:</h3>
                 <ul>
-                    <li>Create a stable power distribution network</li>
-                    <li>Balance load across all circuits</li>
-                    <li>Maintain voltage levels within safety limits</li>
-                    <li>Complete circuit under time pressure</li>
+                    <li>Navigate through the complex maze system</li>
+                    <li>Reach the extraction point (red marker)</li>
+                    <li>Minimize moves and completion time</li>
+                    <li>Avoid dead ends and optimize your path</li>
                 </ul>
             </div>
-            <button id="start-button">Initialize System</button>
+            <div class="difficulty-selector">
+                <h3>Select Difficulty</h3>
+                <div class="difficulty-buttons">
+                    <button data-difficulty="easy" class="selected">Training</button>
+                    <button data-difficulty="medium">Advanced</button>
+                    <button data-difficulty="hard">Expert</button>
+                </div>
+            </div>
+            <button id="start-button">Begin Mission</button>
         </div>
 
         <!-- Game Board -->
         <div id="game-board" class="hidden">
-            <div class="component-tray">
-                <!-- Component slots will be generated here -->
-            </div>
-            
-            <div class="circuit-grid">
-                <!-- Circuit grid will be generated here -->
-            </div>
-
-            <div class="status-panel">
-                <div class="voltage-meter">
-                    <div class="meter-label">System Voltage</div>
-                    <div class="meter-value">0.0V</div>
-                    <div class="meter-bar">
-                        <div class="meter-fill"></div>
+            <div class="game-info">
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Moves</div>
+                        <div class="stat-value" id="moves">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="timer">00:00</div>
                     </div>
                 </div>
-                <div class="time-display">
-                    <div class="time-label">Time Remaining</div>
-                    <div class="time-value">03:00</div>
-                </div>
-                <div class="error-counter">
-                    <div class="error-label">System Errors</div>
-                    <div class="error-value">0/3</div>
-                </div>
+            </div>
+
+            <div id="maze"></div>
+
+            <div class="controls-hint">
+                Use ← ↑ → ↓ arrow keys to navigate
             </div>
         </div>
 
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="hidden">
             <div class="result-container">
-                <h2>System Failure</h2>
+                <h2>Mission Failed</h2>
                 <div class="stats">
+                    <p>Distance Covered: <span id="final-moves">0</span> moves</p>
                     <p>Time Elapsed: <span id="time-elapsed">00:00</span></p>
-                    <p>Errors Encountered: <span id="error-count">0</span></p>
-                    <p>Circuit Completion: <span id="completion-percentage">0%</span></p>
                 </div>
-                <button id="restart-button">Reinitialize System</button>
+                <button id="restart-button">Retry Mission</button>
             </div>
         </div>
 
@@ -91,24 +85,24 @@
                     <div class="checkmark"></div>
                 </div>
             </div>
-            <h2>System Successfully Optimized! 🎉</h2>
+            <h2>Mission Accomplished! 🎉</h2>
             <div class="performance-metrics">
                 <div class="metric">
                     <span class="label">Efficiency Rating:</span>
                     <span class="value" id="efficiency-rating">98%</span>
                 </div>
                 <div class="metric">
-                    <span class="label">Completion Time:</span>
-                    <span class="value" id="completion-time">02:34</span>
+                    <span class="label">Total Moves:</span>
+                    <span class="value" id="total-moves">42</span>
                 </div>
                 <div class="metric">
-                    <span class="label">Power Stability:</span>
-                    <span class="value" id="power-stability">Optimal</span>
+                    <span class="label">Time Bonus:</span>
+                    <span class="value" id="time-bonus">+500</span>
                 </div>
             </div>
             <div class="win-buttons">
-                <button onclick="returnToLevels()">Return to Command Center</button>
-                <button onclick="goToNextLevel()">Proceed to Next Challenge</button>
+                <button onclick="returnToLevels()">Return to Hub</button>
+                <button onclick="goToNextLevel()">Next Challenge</button>
             </div>
         </div>
     </div>

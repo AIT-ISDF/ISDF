@@ -1,383 +1,255 @@
-// Check level progress
-document.addEventListener('DOMContentLoaded', function() {
+// Level access check
+document.addEventListener('DOMContentLoaded', () => {
+    // Check level access
     const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
     if (13 > currentProgress) {
         window.location.href = '../index.html';
         return;
     }
-    initializeGame();
+
+    // Event Listeners
+    document.getElementById('play-button').addEventListener('click', () => {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        initializeGame();
+        createGrid();
+    });
+
+    document.getElementById('restart').addEventListener('click', () => {
+        restartGame();
+    });
+
+    document.getElementById('restart-over').addEventListener('click', () => {
+        restartGame();
+    });
+
+    // Prevent context menu from showing on right-click
+    document.addEventListener('contextmenu', e => e.preventDefault());
 });
 
-// Game Configuration
-const GAME_CONFIG = {
-    timeLimit: 300, // 5 minutes in seconds
-    gridSize: 15,
-    maxHints: 3,
-    words: [
-        {
-            word: "ALGORITHM",
-            clue: "Step-by-step procedure for calculations",
-            direction: "across",
-            startX: 3,
-            startY: 2
-        },
-        {
-            word: "DATABASE",
-            clue: "Organized collection of data",
-            direction: "down",
-            startX: 5,
-            startY: 1
-        },
-        {
-            word: "FUNCTION",
-            clue: "Named block of reusable code",
-            direction: "across",
-            startX: 2,
-            startY: 5
-        },
-        {
-            word: "VARIABLE",
-            clue: "Named storage location",
-            direction: "down",
-            startX: 8,
-            startY: 3
-        },
-        {
-            word: "INTERFACE",
-            clue: "Point of interaction between components",
-            direction: "across",
-            startX: 1,
-            startY: 8
-        }
-    ],
-    pointsPerWord: 100,
-    timeBonus: 10, // points per second remaining
-};
+// Game Constants
+const GRID_SIZE = 10;
+const MINE_COUNT = 15;
+const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
-// Game State
-let gameState = {
-    running: false,
-    timeRemaining: GAME_CONFIG.timeLimit,
-    hintsRemaining: GAME_CONFIG.maxHints,
-    score: 0,
-    solvedWords: [],
-    selectedWord: null,
-    timer: null,
-    currentLetters: [],
-    gridState: Array(GAME_CONFIG.gridSize).fill(null).map(() => 
-        Array(GAME_CONFIG.gridSize).fill({ letter: '', solved: false }))
-};
+// Game Variables
+let mineLocations = [];
+let cells = [];
+let gameOver = false;
+let flagsPlaced = 0;
+let correctFlags = 0;
+let revealedCells = 0;
+let timer = 0;
+let timerInterval;
 
-// Initialize Game
+// Game Functions
 function initializeGame() {
-    setupEventListeners();
-    createGrid();
-    createClues();
-    shuffleWords();
+    mineLocations = [];
+    cells = [];
+    gameOver = false;
+    flagsPlaced = 0;
+    correctFlags = 0;
+    revealedCells = 0;
+    timer = 0;
+    generateMines();
 }
 
-function setupEventListeners() {
-    document.getElementById('start-button').addEventListener('click', startGame);
-    document.getElementById('restart-button').addEventListener('click', restartGame);
-    document.getElementById('confirm-hint').addEventListener('click', useHint);
-    document.getElementById('cancel-hint').addEventListener('click', closeHintModal);
+function generateMines() {
+    while (mineLocations.length < MINE_COUNT) {
+        const position = Math.floor(Math.random() * (GRID_SIZE * GRID_SIZE));
+        if (!mineLocations.includes(position)) {
+            mineLocations.push(position);
+        }
+    }
 }
 
 function createGrid() {
-    const grid = document.querySelector('.word-grid');
-    grid.innerHTML = '';
+    const gridElement = document.getElementById('grid');
+    gridElement.innerHTML = '';
+    cells = [];
+    gameOver = false;
 
-    for (let y = 0; y < GAME_CONFIG.gridSize; y++) {
-        for (let x = 0; x < GAME_CONFIG.gridSize; x++) {
-            const cell = document.createElement('div');
-            cell.className = 'grid-cell';
-            cell.dataset.x = x;
-            cell.dataset.y = y;
-            cell.addEventListener('click', () => handleCellClick(x, y));
-            grid.appendChild(cell);
-        }
+    for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleLeftClick);
+        cell.addEventListener('contextmenu', handleRightClick);
+        gridElement.appendChild(cell);
+        cells.push(cell);
+    }
+    updateFlagsCounter();
+    startTimer();
+}
+
+function handleLeftClick(event) {
+    if (gameOver) return;
+    const cell = event.target;
+    const index = parseInt(cell.dataset.index);
+
+    if (cell.classList.contains('flag')) return;
+
+    if (mineLocations.includes(index)) {
+        gameOver = true;
+        revealAllMines();
+        showGameOver(false, 'You hit a mine!');
+    } else {
+        revealCell(index);
     }
 }
 
-function createClues() {
-    const acrossClues = document.getElementById('across-clues');
-    const downClues = document.getElementById('down-clues');
+function handleRightClick(event) {
+    event.preventDefault();
+    if (gameOver) return;
+
+    const cell = event.target;
+    const index = parseInt(cell.dataset.index);
+    if (cell.classList.contains('revealed')) return;
+
+    if (cell.classList.contains('flag')) {
+        cell.classList.remove('flag');
+        cell.textContent = '';
+        flagsPlaced--;
+        if (mineLocations.includes(index)) {
+            correctFlags--;
+        }
+    } else if (flagsPlaced < MINE_COUNT) {
+        cell.classList.add('flag');
+        cell.textContent = 'O';
+        flagsPlaced++;
+        if (mineLocations.includes(index)) {
+            correctFlags++;
+            checkWinCondition();
+        }
+    }
+    updateFlagsCounter();
+}
+
+function revealCell(index) {
+    const cell = cells[index];
+    if (cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
+
+    cell.classList.add('revealed');
+    revealedCells++;
     
-    acrossClues.innerHTML = '';
-    downClues.innerHTML = '';
+    const mineCount = countAdjacentMines(index);
+    if (mineCount > 0) {
+        cell.textContent = mineCount;
+        cell.classList.add(`n${mineCount}`);
+    } else {
+        const row = Math.floor(index / GRID_SIZE);
+        const col = index % GRID_SIZE;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                const newRow = row + i;
+                const newCol = col + j;
+                if (newRow >= 0 && newRow < GRID_SIZE && newCol >= 0 && newCol < GRID_SIZE) {
+                    const newIndex = newRow * GRID_SIZE + newCol;
+                    revealCell(newIndex);
+                }
+            }
+        }
+    }
+    checkWinCondition();
+}
 
-    GAME_CONFIG.words.forEach((word, index) => {
-        const clueElement = document.createElement('div');
-        clueElement.className = 'clue-item';
-        clueElement.dataset.wordIndex = index;
-        clueElement.textContent = `${index + 1}. ${word.clue}`;
-        clueElement.addEventListener('click', () => selectWord(index));
+function countAdjacentMines(index) {
+    const row = Math.floor(index / GRID_SIZE);
+    const col = index % GRID_SIZE;
+    let count = 0;
 
-        if (word.direction === 'across') {
-            acrossClues.appendChild(clueElement);
+    for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+            const newRow = row + i;
+            const newCol = col + j;
+            if (newRow >= 0 && newRow < GRID_SIZE && newCol >= 0 && newCol < GRID_SIZE) {
+                const checkIndex = newRow * GRID_SIZE + newCol;
+                if (mineLocations.includes(checkIndex)) {
+                    count++;
+                }
+            }
+        }
+    }
+    return count;
+}
+
+function checkWinCondition() {
+    // Win by correctly flagging all mines
+    if (correctFlags === MINE_COUNT && flagsPlaced === MINE_COUNT) {
+        showGameOver(true, 'You won by correctly flagging all mines!');
+        return;
+    }
+
+    // Win by revealing all non-mine cells
+    const revealedNonMines = revealedCells;
+    const totalNonMines = TOTAL_CELLS - MINE_COUNT;
+    if (revealedNonMines === totalNonMines) {
+        showGameOver(true, 'You won by revealing all safe cells!');
+        return;
+    }
+}
+
+function showGameOver(won, message) {
+    clearInterval(timerInterval);
+    gameOver = true;
+
+    if (won) {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('level-complete').classList.remove('hidden');
+        document.querySelector('.next-level-button').style.display = 'block';
+        completeLevel(6);
+
+        // Show correct flags
+        mineLocations.forEach(index => {
+            const cell = cells[index];
+            if (cell.classList.contains('flag')) {
+                cell.classList.add('correct-flag');
+            }
+        });
+    } else {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        
+        document.getElementById('game-over-text').textContent = 'Game Over!';
+        document.getElementById('final-time').textContent = `Time: ${timer}s`;
+        document.getElementById('result-message').textContent = message || '';
+
+        revealAllMines();
+    }
+}
+
+function revealAllMines() {
+    mineLocations.forEach(index => {
+        const cell = cells[index];
+        if (!cell.classList.contains('flag')) {
+            cell.classList.add('mine');
+            cell.textContent = '💣';
         } else {
-            downClues.appendChild(clueElement);
+            cell.classList.add('correct-flag');
+        }
+    });
+
+    cells.forEach((cell, index) => {
+        if (cell.classList.contains('flag') && !mineLocations.includes(index)) {
+            cell.classList.add('wrong-flag');
         }
     });
 }
 
-function shuffleWords() {
-    GAME_CONFIG.words.forEach(word => {
-        word.scrambled = shuffleString(word.word);
-    });
-}
-
-function shuffleString(str) {
-    return str.split('')
-        .sort(() => Math.random() - 0.5)
-        .join('');
-}
-
-function startGame() {
-    gameState.running = true;
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('game-board').classList.remove('hidden');
-    
-    startTimer();
-    displayScrambledWords();
+function updateFlagsCounter() {
+    document.getElementById('flags-left').textContent = `Flags: ${MINE_COUNT - flagsPlaced}`;
 }
 
 function startTimer() {
-    gameState.timer = setInterval(() => {
-        gameState.timeRemaining--;
-        updateTimerDisplay();
-        
-        if (gameState.timeRemaining <= 0) {
-            gameOver(false);
-        }
+    clearInterval(timerInterval);
+    timer = 0;
+    timerInterval = setInterval(() => {
+        timer++;
+        document.getElementById('time').textContent = `Time: ${timer}s`;
     }, 1000);
 }
 
-function updateTimerDisplay() {
-    const minutes = Math.floor(gameState.timeRemaining / 60);
-    const seconds = gameState.timeRemaining % 60;
-    document.querySelector('.timer-value').textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function displayScrambledWords() {
-    const letterBank = document.querySelector('.letter-tiles');
-    letterBank.innerHTML = '';
-
-    GAME_CONFIG.words.forEach(word => {
-        if (!gameState.solvedWords.includes(word.word)) {
-            const wordContainer = document.createElement('div');
-            wordContainer.className = 'scrambled-word';
-            
-            word.scrambled.split('').forEach(letter => {
-                const tile = createLetterTile(letter);
-                wordContainer.appendChild(tile);
-            });
-            
-            letterBank.appendChild(wordContainer);
-        }
-    });
-}
-
-function createLetterTile(letter) {
-    const tile = document.createElement('div');
-    tile.className = 'letter-tile';
-    tile.textContent = letter;
-    tile.draggable = true;
-    tile.addEventListener('dragstart', handleDragStart);
-    tile.addEventListener('dragend', handleDragEnd);
-    return tile;
-}
-
-function handleCellClick(x, y) {
-    if (!gameState.running) return;
-
-    const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-    if (cell.classList.contains('fixed')) return;
-
-    if (gameState.selectedWord) {
-        // Handle letter placement
-        placeLetter(x, y);
-    }
-}
-
-function selectWord(wordIndex) {
-    if (!gameState.running) return;
-
-    gameState.selectedWord = GAME_CONFIG.words[wordIndex];
-    highlightSelectedWord();
-}
-
-function highlightSelectedWord() {
-    // Remove previous highlights
-    document.querySelectorAll('.grid-cell.active').forEach(cell => {
-        cell.classList.remove('active');
-    });
-
-    if (!gameState.selectedWord) return;
-
-    const { startX, startY, direction, word } = gameState.selectedWord;
-    const length = word.length;
-
-    for (let i = 0; i < length; i++) {
-        const x = direction === 'across' ? startX + i : startX;
-        const y = direction === 'across' ? startY : startY + i;
-        const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-        if (cell) cell.classList.add('active');
-    }
-}
-
-function placeLetter(x, y) {
-    if (!gameState.currentLetters.length) return;
-
-    const letter = gameState.currentLetters[0];
-    const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-    
-    cell.textContent = letter;
-    gameState.gridState[y][x].letter = letter;
-    
-    checkWordCompletion();
-}
-
-function checkWordCompletion() {
-    if (!gameState.selectedWord) return;
-
-    const { startX, startY, direction, word } = gameState.selectedWord;
-    let currentWord = '';
-
-    for (let i = 0; i < word.length; i++) {
-        const x = direction === 'across' ? startX + i : startX;
-        const y = direction === 'across' ? startY : startY + i;
-        currentWord += gameState.gridState[y][x].letter;
-    }
-
-    if (currentWord === word) {
-        handleWordSolved(word);
-    }
-}
-
-function handleWordSolved(word) {
-    gameState.solvedWords.push(word);
-    gameState.score += GAME_CONFIG.pointsPerWord;
-    updateScore();
-
-    // Mark cells as solved
-    const wordConfig = GAME_CONFIG.words.find(w => w.word === word);
-    markWordAsSolved(wordConfig);
-
-    if (gameState.solvedWords.length === GAME_CONFIG.words.length) {
-        gameOver(true);
-    }
-}
-
-function markWordAsSolved(wordConfig) {
-    const { startX, startY, direction, word } = wordConfig;
-    
-    for (let i = 0; i < word.length; i++) {
-        const x = direction === 'across' ? startX + i : startX;
-        const y = direction === 'across' ? startY : startY + i;
-        const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-        cell.classList.add('solved');
-        gameState.gridState[y][x].solved = true;
-    }
-
-    // Mark clue as solved
-    const clueElement = document.querySelector(`.clue-item[data-word-index="${GAME_CONFIG.words.indexOf(wordConfig)}"]`);
-    clueElement.classList.add('solved');
-}
-
-function useHint() {
-    if (gameState.hintsRemaining <= 0 || !gameState.selectedWord) return;
-
-    gameState.hintsRemaining--;
-    document.querySelector('.hints-value').textContent = gameState.hintsRemaining;
-
-    // Reveal a random unsolved letter
-    revealHintLetter();
-    closeHintModal();
-}
-
-function revealHintLetter() {
-    const { startX, startY, direction, word } = gameState.selectedWord;
-    const unsolvedIndices = [];
-
-    for (let i = 0; i < word.length; i++) {
-        const x = direction === 'across' ? startX + i : startX;
-        const y = direction === 'across' ? startY : startY + i;
-        if (!gameState.gridState[y][x].solved) {
-            unsolvedIndices.push(i);
-        }
-    }
-
-    if (unsolvedIndices.length > 0) {
-        const randomIndex = unsolvedIndices[Math.floor(Math.random() * unsolvedIndices.length)];
-        const x = direction === 'across' ? startX + randomIndex : startX;
-        const y = direction === 'across' ? startY : startY + randomIndex;
-        
-        const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-        cell.textContent = word[randomIndex];
-        gameState.gridState[y][x].letter = word[randomIndex];
-        gameState.gridState[y][x].solved = true;
-        cell.classList.add('hint');
-    }
-}
-
-function gameOver(isWin) {
-    clearInterval(gameState.timer);
-    gameState.running = false;
-
-    if (isWin) {
-        const timeBonus = gameState.timeRemaining * GAME_CONFIG.timeBonus;
-        gameState.score += timeBonus;
-        
-        document.getElementById('accuracy-rating').textContent = 
-            `${Math.round((gameState.solvedWords.length / GAME_CONFIG.words.length) * 100)}%`;
-        document.getElementById('time-bonus').textContent = `+${timeBonus}`;
-        document.getElementById('win-score').textContent = gameState.score;
-        
-        document.getElementById('winMessage').style.display = 'block';
-        document.querySelector('.next-level-button').style.display = 'block';
-        completeLevel(13);
-    } else {
-        document.getElementById('words-completed').textContent = gameState.solvedWords.length;
-        document.getElementById('time-elapsed').textContent = 
-            `${Math.floor((GAME_CONFIG.timeLimit - gameState.timeRemaining) / 60)}:${((GAME_CONFIG.timeLimit - gameState.timeRemaining) % 60).toString().padStart(2, '0')}`;
-        document.getElementById('final-score').textContent = gameState.score;
-        
-        document.getElementById('game-board').classList.add('hidden');
-        document.getElementById('game-over-screen').classList.remove('hidden');
-    }
-}
-
-function updateScore() {
-    document.querySelector('.score-value').textContent = gameState.score;
-}
-
-function restartGame() {
-    gameState = {
-        running: false,
-        timeRemaining: GAME_CONFIG.timeLimit,
-        hintsRemaining: GAME_CONFIG.maxHints,
-        score: 0,
-        solvedWords: [],
-        selectedWord: null,
-        timer: null,
-        currentLetters: [],
-        gridState: Array(GAME_CONFIG.gridSize).fill(null).map(() => 
-            Array(GAME_CONFIG.gridSize).fill({ letter: '', solved: false }))
-    };
-
-    document.querySelectorAll('.grid-cell').forEach(cell => {
-        cell.textContent = '';
-        cell.className = 'grid-cell';
-    });
-
-    document.querySelectorAll('.clue-item').forEach(clue => {
-        clue.classList.remove('solved');
-    });
-
-    startGame();
-}
+// Level Navigation Functions
 
 function completeLevel(levelNumber) {
     const currentProgress = parseInt(localStorage.getItem('levelProgress') || '1');
@@ -386,5 +258,11 @@ function completeLevel(levelNumber) {
     }
 }
 
-// Initialize game when document is loaded
-document.addEventListener('DOMContentLoaded', initializeGame);
+function restartGame() {
+    document.getElementById('level-complete').classList.add('hidden');
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.querySelector('.next-level-button').style.display = 'none';
+    initializeGame();
+    createGrid();
+}
