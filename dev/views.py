@@ -80,28 +80,43 @@ def leaderboard(request):
 from django.http import JsonResponse
 from .models import LeaderboardEntry
 import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
+@csrf_exempt
 def update_level(request):
     if request.method == 'POST':
         print("Update level request received")  # Debug statement
         try:
             user = request.user  # Ensure the user is authenticated
+            if not user.is_authenticated:
+                return JsonResponse({'success': False, 'error': 'User not authenticated'}, status=403)
+
             data = json.loads(request.body)
             level = data.get('level')
 
-            # Update or create a leaderboard entry
-            entry, created = LeaderboardEntry.objects.update_or_create(
-                user=user,
-                defaults={'level': level},
-            )
+           
 
-            print(f"Level updated for user {user.username}: {entry.level}")  # Debug statement
-            return JsonResponse({'success': True, 'level': entry.level})
+            # Get or create leaderboard entry
+            entry, created = LeaderboardEntry.objects.get_or_create(user=user)
+
+            # Update level only if the new level is higher
+            if level > entry.level:
+                entry.level = level
+                entry.save()
+                print(f"Level updated for user {user.username}: {entry.level}")  # Debug statement
+                return JsonResponse({'success': True, 'level': entry.level})
+            else:
+                print(f"Level not updated for user {user.username}: Current level {entry.level}, New level {level}")
+                return JsonResponse({'success': True, 'level': entry.level, 'message': 'Level not updated; already higher or equal'})
+
         except Exception as e:
             print(f"Error: {e}")  # Debugging error
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
 
 @login_required
 def game1(request):

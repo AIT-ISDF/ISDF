@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Word Guessing - Level 3</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-controls">
+        <button class="return-button" onclick="returnToLevels()">Return to Levels</button>
+        <button class="next-level-button" onclick="goToNextLevel()">Next Level</button>
+    </div>
+
+    <h1>Word Guessing Game</h1>
+
+    <div class="game-container">
+        <div class="grid" id="grid">
+            <!-- The grid will be dynamically generated -->
+        </div>
+        <div class="keyboard" id="keyboard">
+            <!-- The keyboard will be dynamically generated -->
+        </div>
+        <div class="message-container" id="message"></div>
+        <!-- Restart Game Button -->
+        <button id="restartButton">Restart Game</button>
+    </div>
+
+    <div class="win-message" id="winMessage">
+        <h2>Congratulations! 🎉</h2>
+        <p>You've completed Level 3!</p>
+        <div class="win-buttons">
+            <button onclick="returnToLevels()">Return to Levels</button>
+            <button onclick="goToNextLevel()">Next Level</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
